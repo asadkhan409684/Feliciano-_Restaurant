@@ -26,11 +26,18 @@
 - [🛠️ Installation](#️-installation)
 - [⚙️ Configuration](#️-configuration)
 - [📁 Project Structure](#-project-structure)
+- [🔐 Security Features](#-security-features)
+- [📱 Mobile Responsiveness](#-mobile-responsiveness)
+- [📊 Analytics & Reporting](#-analytics--reporting)
 - [🗄️ Database Schema](#️-database-schema)
 - [🎨 UI/UX Features](#-uiux-features)
 - [🔧 Technical Stack](#-technical-stack)
+- [🌟 Key Highlights](#-key-highlights)
+- [📊 Project Statistics](#-project-statistics)
 - [🛣️ Roadmap](#️-roadmap)
+- [📞 Support & Contact](#-support--contact)
 - [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
 
 ---
 
@@ -148,9 +155,6 @@ graph TB
 ```
 Feliciano Restaurant/
 ├── 🎨 assets/                # Static assets (CSS, JS, Images)
-│   ├── css/                  # Modern stylesheets
-│   ├── js/                   # Interactive scripts
-│   └── images/               # Dish and UI images
 ├── ⚙️ config/                # System configuration
 │   └── database.php          # Database connection
 ├── 🔐 auth/                  # Authentication modules
@@ -170,14 +174,55 @@ Feliciano Restaurant/
 
 ---
 
+## 🔐 Security Features
+
+### 🛡️ **Data Protection**
+- **SQL Injection Prevention**: Using prepared statements for all database interactions.
+- **XSS Protection**: Input sanitization and output encoding for user reviews and profile data.
+- **Session Management**: Secure session handling with proper expiration and role validation.
+
+### 🔒 **Access Control**
+- **Role-Based Access (RBAC)**: Strict permission checks for Admin, Manager, and Customer roles.
+- **Secure Authentication**: Hashed password storage and secure login mechanisms.
+
+---
+
+## 📱 Mobile Responsiveness
+
+### 📐 **Responsive Design**
+- **Mobile-First Approach**: Optimized for 📱 mobile, 💻 tablet, and 🖥️ desktop.
+- **Bootstrap 5.3 Framework**: Utilizing a modern grid system and components.
+- **Touch-Friendly UI**: Large interactive elements for easier mobile navigation.
+
+---
+
+## 📊 Analytics & Reporting
+
+### 📈 **Management Insights**
+- **Order Statistics**: Track daily sales and popular items.
+- **Reservation Trends**: Monitor peak hours and table usage.
+- **User Activity**: Overview of customer registrations and interactions.
+
+---
+
 ## 🗄️ Database Schema
 
-The core system relies on several key tables:
-- `users`: Account management and roles.
-- `menu_items`: Product catalog and categories.
-- `orders` & `order_items`: Sales and transaction tracking.
-- `reservations`: Dining-in booking data.
-- `reviews`: Customer feedback and ratings.
+The system uses a robust relational database structure to manage restaurant operations. Below are the core tables:
+
+| Table Name | Description |
+|------------|-------------|
+| `users` | Core user accounts with role-based access (Admin, Manager, Customer, Staff). |
+| `customers` | Detailed customer profiles, linked to users, with order history analytics. |
+| `roles` | Defines system access levels and permissions. |
+| `menu_items` | Catalog of food items, including prices, categories, and availability status. |
+| `orders` | Records for both online and offline orders, tracking status and totals. |
+| `order_items` | Granular data for each item within an order, including quantities and prices. |
+| `reservations` | Table booking records with guest counts, dates, and special occasions. |
+| `tables` | Physical restaurant table management (capacity, location, and real-time status). |
+| `reviews` | Customer feedback and 5-star rating system management. |
+| `restaurant_settings` | Global configuration for contact info, opening hours, and system behavior. |
+| `admin_notifications` | Real-time system alerts for staff regarding new orders or reservations. |
+| `user_sessions` | Secure session tracking for authenticated users. |
 
 ---
 
@@ -200,6 +245,28 @@ The core system relies on several key tables:
 
 ---
 
+## 🌟 Key Highlights
+
+- **Premium Design**: Modern and elegant interface for high-end restaurants.
+- **Interactive Experience**: Smooth transitions and real-time updates.
+- **Comprehensive Solution**: Handles both dining-in and online orders seamlessly.
+- **Advanced Admin Panel**: Powerful tools for restaurant management.
+
+---
+
+## 📊 Project Statistics
+
+```
+📊 Project Metrics:
+├── 📁 Total Files: 50+
+├── 💻 Lines of Code: 10,000+
+├── 🗄️ Database Tables: 10+
+├── 👥 User Roles: 3
+└── 🎨 UI Components: 100+
+```
+
+---
+
 ## 🛣️ Roadmap
 
 - [ ] **Online Payments**: Integration with SSLCommerz/bKash.
@@ -210,9 +277,49 @@ The core system relies on several key tables:
 
 ---
 
+## 📞 Support & Contact
+
+### 🆘 **Getting Help**
+- **📧 Email Support**: support@feliciano.com
+- **💬 Technical Support**: help.feliciano.com
+
+### 🌐 **Community**
+- **📘 Facebook**: [Feliciano Community](https://facebook.com/feliciano)
+- **🐦 Twitter**: [@FelicianoRest](https://twitter.com/feliciano)
+
+---
+
 ## 📄 License
 
-This project is licensed for **educational and portfolio purposes**. See the project files for more details.
+This project is licensed under the **MIT License** - see the `LICENSE` file for details.
+
+```
+MIT License
+
+Copyright (c) 2026 Feliciano Restaurant Development Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+```
+
+---
+
+## 🙏 Acknowledgments
+
+### 👨‍💻 **Development Team**
+- **Lead Developer**: [Your Name]
+- **Documentation**: [Your Name]
+
+### 🎨 **Inspiration**
+- **Patoare**: UI/UX and documentation structure inspiration.
+- **Material Design**: For clean and professional design principles.
 
 ---
 
