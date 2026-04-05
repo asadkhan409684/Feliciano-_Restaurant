@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 08, 2026 at 07:54 PM
+-- Generation Time: Mar 10, 2026 at 07:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,6 +37,17 @@ CREATE TABLE `admin_notifications` (
   `is_read` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin_notifications`
+--
+
+INSERT INTO `admin_notifications` (`id`, `notification_id`, `type`, `title`, `message`, `related_id`, `is_read`, `created_at`) VALUES
+(1, NULL, 'order', 'New Order Received', 'Order ORD-20260308-6480 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-6480', 0, '2026-03-08 21:05:29'),
+(2, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1942 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1942', 0, '2026-03-08 21:09:33'),
+(3, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1920 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1920', 0, '2026-03-08 21:10:10'),
+(4, NULL, 'order', 'New Order Received', 'Order ORD-20260308-8103 received from Bani Amin ()', 'ORD-20260308-8103', 0, '2026-03-08 21:58:42'),
+(5, NULL, 'order', 'New Order Received', 'Order ORD-20260308-4180 received from bani amin (baniamin@gmail.com)', 'ORD-20260308-4180', 0, '2026-03-08 22:05:39');
 
 -- --------------------------------------------------------
 
@@ -110,6 +121,21 @@ CREATE TABLE `menu_items` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `menu_items`
+--
+
+INSERT INTO `menu_items` (`id`, `menu_id`, `name`, `description`, `category`, `price`, `image_url`, `ingredients`, `status`, `created_at`, `updated_at`) VALUES
+(9, NULL, 'BACON AND EGGS', 'Bacon and eggs is a classic breakfast item that combines the savory crunch of bacon with the creamy richness of eggs', 'breakfast', 100.00, 'assets/images/menu/menu_69add7a3dcff7.jpg', '', 'active', '2026-03-08 20:10:11', '2026-03-08 21:15:33'),
+(10, NULL, 'Pancakes with Honey', 'Pancakes with honey are a delightful dish that combines the soft, fluffy texture of pancakes with the natural sweetness of honey. ', 'breakfast', 120.00, 'assets/images/menu/menu_69add88c8b486.jpg', '', 'active', '2026-03-08 20:14:04', '2026-03-08 20:19:39'),
+(11, NULL, 'Sausage & Egg Breakfast Plate', 'Cooked sausages are a staple, often browned and seasoned to taste. \r\n', 'breakfast', 150.00, 'assets/images/menu/menu_69add9a9647c1.jpeg', '', 'active', '2026-03-08 20:18:49', '2026-03-08 20:19:30'),
+(12, NULL, 'Beef Steak Platter  ', 'A hearty beef steak platter featuring a perfectly seared, tender steak (such as sirloin or ribeye) paired with creamy, buttered mashed.', 'platter', 300.00, 'assets/images/menu/menu_69addb7c552ea.jpg', '', 'active', '2026-03-08 20:26:36', '2026-03-08 20:26:36'),
+(13, NULL, 'Chicken BBQ Pizza', 'A Chicken BBQ Pizza features a crispy crust topped with tangy BBQ sauce, grilled chicken breast, mozzarella/gouda cheese, and sliced red onions.', 'pizza', 400.00, 'assets/images/menu/menu_69addcac4d5e3.jpg', '', 'active', '2026-03-08 20:31:40', '2026-03-08 20:31:40'),
+(14, NULL, 'Beef Pepperoni Pizza', 'A beef pepperoni pizza is a classic, popular pizza variety featuring a crispy or chewy crust topped with savory, slightly spicy, cured beef slices and melted cheese', 'pizza', 600.00, 'assets/images/menu/menu_69addd8199953.jpg', '', 'active', '2026-03-08 20:35:13', '2026-03-08 20:35:13'),
+(15, NULL, 'Mutton Biryani', 'Mutton biryani is a luxurious South Asian rice dish featuring tender, marinated goat or lamb layered with fragrant, long-grain basmati rice and aromatic spices', 'signature', 300.00, 'assets/images/menu/menu_69adde2b3f344.png', '', 'active', '2026-03-08 20:38:03', '2026-03-08 20:38:03'),
+(16, NULL, 'Whopper', 'The Burger King Whopper is a signature fast-food burger featuring a 1/4 lb savory flame-grilled beef patty, topped with ', 'burger', 300.00, 'assets/images/menu/menu_69adde96ce213.png', '', 'active', '2026-03-08 20:39:50', '2026-03-08 20:39:50'),
+(17, NULL, 'pasta and chowmein', 'Pasta and chowmein are distinct noodle dishes, with pasta traditionally using durum wheat in Italian cuisine, while chowmein consists of stir-fried Chinese noodles', 'pasta & chowmein', 250.00, 'assets/images/menu/menu_69addf3255b63.jpg', '', 'active', '2026-03-08 20:42:26', '2026-03-08 20:42:26');
+
 -- --------------------------------------------------------
 
 --
@@ -137,6 +163,16 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `order_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `order_type`, `table_number`, `delivery_address`, `delivery_time`, `special_instructions`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `created_at`, `updated_at`) VALUES
+(4, 'ORD-20260308-6480', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', NULL, 'kazipara', '2026-03-09 15:05:00', NULL, 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:05:29', '2026-03-08 21:38:48'),
+(5, 'ORD-20260308-1942', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', '', 'kazipara', '2026-03-09 15:05:00', '', 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:09:33', '2026-03-08 21:15:19'),
+(7, 'ORD-20260308-8103', NULL, 'Bani Amin', '', '01234567891', 'offline', '1', '', NULL, 'Make good', 670.00, 0.00, 670.00, 'preparing', 'pending', '2026-03-08 21:58:42', '2026-03-08 22:03:05'),
+(8, 'ORD-20260308-4180', NULL, 'bani amin', 'baniamin@gmail.com', '01324567891', 'online', '', 'kazipara', '2026-03-10 16:05:00', 'dfds', 100.00, 0.00, 100.00, 'pending', 'pending', '2026-03-08 22:05:39', '2026-03-08 22:05:39');
+
 -- --------------------------------------------------------
 
 --
@@ -154,6 +190,21 @@ CREATE TABLE `order_items` (
   `special_instructions` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `menu_item_name`, `quantity`, `unit_price`, `total_price`, `special_instructions`, `created_at`) VALUES
+(2, 4, 13, 'Chicken BBQ Pizza', 1, 400.00, 400.00, NULL, '2026-03-08 21:05:29'),
+(3, 4, 12, 'Beef Steak Platter  ', 1, 300.00, 300.00, NULL, '2026-03-08 21:05:29'),
+(4, 5, 13, 'Chicken BBQ Pizza', 1, 400.00, 400.00, NULL, '2026-03-08 21:09:33'),
+(5, 5, 12, 'Beef Steak Platter  ', 1, 300.00, 300.00, NULL, '2026-03-08 21:09:33'),
+(8, 7, 9, 'BACON AND EGGS', 1, 100.00, 100.00, NULL, '2026-03-08 21:58:42'),
+(9, 7, 10, 'Pancakes with Honey', 1, 120.00, 120.00, NULL, '2026-03-08 21:58:42'),
+(10, 7, 11, 'Sausage & Egg Breakfast Plate', 1, 150.00, 150.00, NULL, '2026-03-08 21:58:42'),
+(11, 7, 16, 'Whopper', 1, 300.00, 300.00, NULL, '2026-03-08 21:58:42'),
+(12, 8, 9, 'BACON AND EGGS', 1, 100.00, 100.00, NULL, '2026-03-08 22:05:39');
 
 -- --------------------------------------------------------
 
@@ -192,6 +243,13 @@ CREATE TABLE `reservations` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reservations`
+--
+
+INSERT INTO `reservations` (`id`, `reservation_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `reservation_date`, `reservation_time`, `guests_count`, `occasion`, `special_requests`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'RES-20260308-4779AA8A', NULL, 'Bani Amin', 'baniamin@gmail.com', '01324567891', '2026-03-10', '20:00:00', 6, 'family', 'fgfd', 'confirmed', '2026-03-08 21:59:34', '2026-03-08 22:02:45');
 
 -- --------------------------------------------------------
 
@@ -274,6 +332,13 @@ CREATE TABLE `subscribers` (
   `status` enum('active','unsubscribed') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `subscribers`
+--
+
+INSERT INTO `subscribers` (`id`, `email`, `subscribed_at`, `status`) VALUES
+(1, 'baniamin@gmail.com', '2026-03-08 21:52:07', 'active');
+
 -- --------------------------------------------------------
 
 --
@@ -320,7 +385,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `full_name`, `email`, `phone`, `role`, `password`, `status`, `terms_accepted`, `login_attempts`, `last_login_attempt`, `account_locked`, `created_at`, `updated_at`) VALUES
 (2, 'Asad', 'Khan', 'Asad khan', 'asadkhan405896@gmail.com', '+8801772353298', 'admin', '$2y$10$S3lKpwKhOU6ITx0QlxPE3uQ4C2MEqUQzgLWdg0lvYPqeVrgu8vBLy', 'active', 0, 0, NULL, 0, '2026-03-08 18:18:39', '2026-03-08 18:18:39'),
-(3, 'Mosabbir', 'Isalm', 'Mosabbir Isalm', 'mosabbir@gmail.com', NULL, 'staff', '$2y$10$JSY/92BTlwXJFMGzcrK9p.QfKdV/wTjGiRSPgwfGRXrIxwNDKsPK2', 'active', 1, 0, NULL, 0, '2026-03-08 18:19:31', '2026-03-08 18:19:31');
+(3, 'Mosabbir', 'Isalm', 'Mosabbir Isalm', 'mosabbir@gmail.com', NULL, 'manager', '$2y$10$JSY/92BTlwXJFMGzcrK9p.QfKdV/wTjGiRSPgwfGRXrIxwNDKsPK2', 'active', 1, 0, NULL, 0, '2026-03-08 18:19:31', '2026-03-08 19:03:15'),
+(4, 'Bani', 'Amin', 'Bani Amin', 'baniamin@gmail.com', '01745623891', 'customer', '$2y$10$2JGARpR9maVU.YgBBdhZ..Ub6TBiCzthcE0bbztrWH1lvYHgy7aga', 'active', 1, 0, NULL, 0, '2026-03-08 21:52:07', '2026-03-08 21:52:07');
 
 -- --------------------------------------------------------
 
@@ -491,7 +557,7 @@ ALTER TABLE `user_sessions`
 -- AUTO_INCREMENT for table `admin_notifications`
 --
 ALTER TABLE `admin_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `customers`
@@ -503,25 +569,25 @@ ALTER TABLE `customers`
 -- AUTO_INCREMENT for table `menu_items`
 --
 ALTER TABLE `menu_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `restaurant_settings`
@@ -545,7 +611,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `subscribers`
 --
 ALTER TABLE `subscribers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `tables`
@@ -557,7 +623,7 @@ ALTER TABLE `tables`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
