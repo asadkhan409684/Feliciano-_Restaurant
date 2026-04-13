@@ -1,0 +1,142 @@
+/* Menu Page Specific Styles - শুধুমাত্র menu.html এর জন্য */
+
+/* Search Bar Styles */
+.search-bar-container {
+    position: relative;
+    margin-bottom: 40px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 15px 40px 15px 20px;
+    background-color: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: #c9a74d;
+    box-shadow: 0 0 10px rgba(201, 167, 77, 0.3);
+}
+
+.search-bar::placeholder {
+    color: #777;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c9a74d;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+/* Menu Categories */
+.menu-categories {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.category-btn.active,
+.category-btn:hover {
+    background-color: #c9a74d;
+    color: #000;
+}
+
+/* Menu Items Container */
+.menu-items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    justify-items: center;
+}
+
+.menu-item {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    padding: 25px;
+    border: 1px solid #333;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.menu-item:hover {
+    box-shadow: 0 18px 40px rgba(201, 167, 77, 0.08);
+    border-color: rgba(201, 167, 77, 0.08);
+}
+
+.menu-item-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.menu-item-content {
+    flex-grow: 1;
+}
+
+.menu-item h4 {
+    font-size: 1.5rem;
+    color: #c9a74d;
+    margin-bottom: 8px;
+}
+
+.menu-item p {
+    color: #aaa;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.menu-item-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #c9a74d;
+    margin-bottom: 10px;
+}
+
+/* Menu Page Responsive Design */
+@media (max-width: 768px) {
+    .menu-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .menu-item-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-items-container {
+        grid-template-columns: 1fr;
+    }
+}
