@@ -808,7 +808,22 @@ function showOrderTypeModal() {
                     const el = document.getElementById('offlineOrderTotal');
                     if (el) el.textContent = `TK ${total.toLocaleString()}`;
                     const offlineModal = document.getElementById('offlineOrderModal');
-                    if (offlineModal) offlineModal.classList.add('active');
+                    if (offlineModal) {
+                        offlineModal.classList.add('active');
+                        // Auto-fill logged-in user's info
+                        const nameField  = document.getElementById('customerNameOffline');
+                        const phoneField = document.getElementById('customerPhoneOffline');
+                        const emailField = document.getElementById('customerEmailOffline');
+                        if (nameField && typeof currentUserName !== 'undefined' && currentUserName !== '') {
+                            nameField.value = currentUserName;
+                        }
+                        if (phoneField && typeof currentUserPhone !== 'undefined' && currentUserPhone !== '') {
+                            phoneField.value = currentUserPhone;
+                        }
+                        if (emailField && typeof currentUserEmail !== 'undefined' && currentUserEmail !== '') {
+                            emailField.value = currentUserEmail;
+                        }
+                    }
                 }
             }, 200);
         });

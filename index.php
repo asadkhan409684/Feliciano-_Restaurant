@@ -9,6 +9,21 @@ function getFeaturedItems($conn, $category, $limit = 4) {
     $stmt->execute();
     return $stmt->get_result();
 }
+
+// Fetch logged-in user's phone from DB
+$loggedUserName  = '';
+$loggedUserEmail = '';
+$loggedUserPhone = '';
+if (isset($_SESSION['user_id'])) {
+    $loggedUserName  = $_SESSION['user_name']  ?? '';
+    $loggedUserEmail = $_SESSION['user_email'] ?? '';
+    $ph = $conn->prepare("SELECT phone FROM users WHERE id = ? LIMIT 1");
+    $ph->bind_param("i", $_SESSION['user_id']);
+    $ph->execute();
+    $ph_row = $ph->get_result()->fetch_assoc();
+    $ph->close();
+    $loggedUserPhone = $ph_row['phone'] ?? '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,7 +40,9 @@ function getFeaturedItems($conn, $category, $limit = 4) {
 
 <body>
     <script>
-        const currentUserEmail = "<?php echo isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''; ?>";
+        const currentUserEmail = "<?php echo htmlspecialchars($loggedUserEmail, ENT_QUOTES); ?>";
+        const currentUserName  = "<?php echo htmlspecialchars($loggedUserName,  ENT_QUOTES); ?>";
+        const currentUserPhone = "<?php echo htmlspecialchars($loggedUserPhone, ENT_QUOTES); ?>";
     </script>
 
     <!-- Header -->
@@ -171,7 +188,7 @@ function getFeaturedItems($conn, $category, $limit = 4) {
                     </div>
                      <div class="form-group">
                         <label for="customerEmailOffline">Email</label>
-                        <input type="email" id="customerEmailOffline" name="customerEmailOffline" placeholder="Optional for guests" value="<?php echo isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''; ?>">
+                        <input type="email" id="customerEmailOffline" name="customerEmailOffline" placeholder="Optional for guests">
                     </div>
                     <div class="form-group">
                         <label for="specialInstructionsOffline">Special Instructions</label>

@@ -3,6 +3,21 @@ session_start();
 require_once '../config/database.php';
 require_once '../config/categories.php';
 
+// Fetch logged-in user's phone number from DB (name & email already in session)
+$loggedUserName  = '';
+$loggedUserEmail = '';
+$loggedUserPhone = '';
+if (isset($_SESSION['user_id'])) {
+    $loggedUserName  = $_SESSION['user_name']  ?? '';
+    $loggedUserEmail = $_SESSION['user_email'] ?? '';
+    $phone_stmt = $conn->prepare("SELECT phone FROM users WHERE id = ? LIMIT 1");
+    $phone_stmt->bind_param("i", $_SESSION['user_id']);
+    $phone_stmt->execute();
+    $phone_row = $phone_stmt->get_result()->fetch_assoc();
+    $phone_stmt->close();
+    $loggedUserPhone = $phone_row['phone'] ?? '';
+}
+
 // Fetch only active categories that have items (or just use all from config if requested)
 // The user said "the categories in $category_labels are not showing on the website"
 // So I will use the keys from $category_labels as the base.
@@ -31,7 +46,9 @@ while($row = $menu_result->fetch_assoc()) {
 
 <body>
     <script>
-        const currentUserEmail = "<?php echo isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''; ?>";
+        const currentUserEmail = "<?php echo htmlspecialchars($loggedUserEmail, ENT_QUOTES); ?>";
+        const currentUserName  = "<?php echo htmlspecialchars($loggedUserName,  ENT_QUOTES); ?>";
+        const currentUserPhone = "<?php echo htmlspecialchars($loggedUserPhone, ENT_QUOTES); ?>";
     </script>
 
     <!-- Header -->
@@ -167,6 +184,10 @@ while($row = $menu_result->fetch_assoc()) {
                     <div class="form-group">
                         <label for="customerPhoneOffline">Phone Number</label>
                         <input type="tel" id="customerPhoneOffline" name="customerPhoneOffline" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmailOffline">Email</label>
+                        <input type="email" id="customerEmailOffline" name="customerEmailOffline" placeholder="Optional for guests">
                     </div>
                     <div class="form-group">
                         <label for="specialInstructionsOffline">Special Instructions</label>
