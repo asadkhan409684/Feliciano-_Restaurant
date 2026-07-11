@@ -30,6 +30,10 @@ while($row = $menu_result->fetch_assoc()) {
 </head>
 
 <body>
+    <script>
+        const currentUserEmail = "<?php echo isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''; ?>";
+    </script>
+
     <!-- Header -->
      <header>   
         <div class="container header-container">

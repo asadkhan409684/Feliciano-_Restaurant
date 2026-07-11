@@ -90,8 +90,18 @@ if(isset($_POST['register'])){
                 // users data insert
                 $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, full_name, email, phone, role, password, terms_accepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->bind_param("sssssssi", $firstName, $lastName, $name, $email, $phone, $userRole, $hashedPassword, $terms);
-                $stmt->execute();        
+                $stmt->execute();
+                $new_user_id = $conn->insert_id;
                 $stmt->close();
+
+                // customers table e insert (only for customer role)
+                if ($userRole === 'customer') {
+                    $customer_id_str = 'CUST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+                    $cust_stmt = $conn->prepare("INSERT INTO customers (user_id, customer_id, full_name, email, phone) VALUES (?, ?, ?, ?, ?)");
+                    $cust_stmt->bind_param("issss", $new_user_id, $customer_id_str, $name, $email, $phone);
+                    $cust_stmt->execute();
+                    $cust_stmt->close();
+                }
                 
                 // check newsletter subscription
                 if ($newsletter) {

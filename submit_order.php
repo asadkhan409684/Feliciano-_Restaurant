@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // --- CUSTOMER PROFILE MANAGEMENT ---
         $customer_db_id = null;
         $user_id = $_SESSION['user_id'] ?? null;
-        
-        // 1. Try to find customer by user_id if logged in, otherwise by email
+
+        // 1. Logged-in user: find by user_id (registered customers always have a record)
         if ($user_id) {
             $cust_stmt = $conn->prepare("SELECT id FROM customers WHERE user_id = ?");
             $cust_stmt->bind_param("i", $user_id);
@@ -83,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $cust_stmt->close();
         }
-        
+
+        // 2. Guest user: try to find by email
         if (!$customer_db_id && !empty($customer_email)) {
             $cust_stmt = $conn->prepare("SELECT id FROM customers WHERE email = ?");
             $cust_stmt->bind_param("s", $customer_email);
@@ -95,16 +96,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cust_stmt->close();
         }
 
-        // 2. Either UPDATE or INSERT customer record
+        // 3. Update stats if record exists, otherwise create a guest record
         if ($customer_db_id) {
-            $upd_cust = $conn->prepare("UPDATE customers SET total_orders = total_orders + 1, total_spent = total_spent + ?, last_order_date = NOW(), user_id = COALESCE(user_id, ?) WHERE id = ?");
-            $upd_cust->bind_param("dii", $total_amount, $user_id, $customer_db_id);
+            // Update order stats (works for both registered & returning guests)
+            $upd_cust = $conn->prepare("UPDATE customers SET total_orders = total_orders + 1, total_spent = total_spent + ?, last_order_date = NOW() WHERE id = ?");
+            $upd_cust->bind_param("di", $total_amount, $customer_db_id);
             $upd_cust->execute();
             $upd_cust->close();
         } else {
-            $new_cust_id_str = 'CUST-' . strtoupper(bin2hex(random_bytes(4)));
-            $ins_cust = $conn->prepare("INSERT INTO customers (customer_id, user_id, full_name, email, phone, total_orders, total_spent, last_order_date) VALUES (?, ?, ?, ?, ?, 1, ?, NOW())");
-            $ins_cust->bind_param("sisssd", $new_cust_id_str, $user_id, $customer_name, $customer_email, $customer_phone, $total_amount);
+            // Only guests (not logged-in) reach here — create a temporary record
+            $new_cust_id_str = 'GUEST-' . strtoupper(bin2hex(random_bytes(4)));
+            $ins_cust = $conn->prepare("INSERT INTO customers (customer_id, user_id, full_name, email, phone, total_orders, total_spent, last_order_date) VALUES (?, NULL, ?, ?, ?, 1, ?, NOW())");
+            $ins_cust->bind_param("ssssd", $new_cust_id_str, $customer_name, $customer_email, $customer_phone, $total_amount);
             $ins_cust->execute();
             $customer_db_id = $conn->insert_id;
             $ins_cust->close();

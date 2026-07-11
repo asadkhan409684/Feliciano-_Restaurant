@@ -62,25 +62,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     if ($stmt->execute()) {
         $_SESSION['user_name'] = $full_name; // Update session name
         
-        // SYNC WITH CUSTOMERS TABLE
+        // SYNC WITH CUSTOMERS TABLE — update only (record created at registration)
         $check_cust = $conn->prepare("SELECT id FROM customers WHERE user_id = ?");
         $check_cust->bind_param("i", $user_id);
         $check_cust->execute();
         $cust_result = $check_cust->get_result();
 
         if ($cust_result->num_rows > 0) {
+            // Record exists (registered customers) — just update
             $update_cust = $conn->prepare("UPDATE customers SET full_name = ?, phone = ?, address = ? WHERE user_id = ?");
             $update_cust->bind_param("sssi", $full_name, $phone, $address, $user_id);
             $update_cust->execute();
         } else {
+            // Fallback: shouldn't happen for registered users, but handle edge case
             $cust_id_str = 'CUST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
-            $email = $_SESSION['user_email'] ?? $user['email'];
-            if(empty($email)) {
-                 $fetch_u = $conn->prepare("SELECT email FROM users WHERE id = ?");
-                 $fetch_u->bind_param("i", $user_id);
-                 $fetch_u->execute();
-                 $email = $fetch_u->get_result()->fetch_assoc()['email'];
-            }
+            $fetch_u = $conn->prepare("SELECT email FROM users WHERE id = ?");
+            $fetch_u->bind_param("i", $user_id);
+            $fetch_u->execute();
+            $email = $fetch_u->get_result()->fetch_assoc()['email'];
             $insert_cust = $conn->prepare("INSERT INTO customers (user_id, customer_id, full_name, email, phone, address) VALUES (?, ?, ?, ?, ?, ?)");
             $insert_cust->bind_param("isssss", $user_id, $cust_id_str, $full_name, $email, $phone, $address);
             $insert_cust->execute();
@@ -96,7 +95,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 $stmt = $conn->prepare("SELECT full_name, email, phone, role, created_at, profile_avatar, profile_hero FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+// profile_avatar / profile_hero column না থাকলে fallback করো
+if ($user === null) {
+    $stmt2 = $conn->prepare("SELECT full_name, email, phone, role, created_at FROM users WHERE id = ?");
+    $stmt2->bind_param("i", $user_id);
+    $stmt2->execute();
+    $user = $stmt2->get_result()->fetch_assoc();
+    $user['profile_avatar'] = null;
+    $user['profile_hero'] = null;
+}
 
 // Fetch Customer ID and Address for the user
 $customerId = 0;

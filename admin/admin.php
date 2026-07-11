@@ -21,13 +21,18 @@ if ($notifications_query) {
 $unread_count_query = $conn->query("SELECT COUNT(*) as count FROM admin_notifications WHERE is_read = 0");
 $unread_count = $unread_count_query ? $unread_count_query->fetch_assoc()['count'] : 0;
 
-// Fetch all branches for filtering
-$branches_query = $conn->query("SELECT * FROM branches ORDER BY name ASC");
+// Fetch all branches for filtering (graceful fallback if table doesn't exist yet)
 $branches = [];
-if ($branches_query) {
-    while($row = $branches_query->fetch_assoc()) {
-        $branches[] = $row;
+try {
+    $branches_query = $conn->query("SELECT * FROM branches ORDER BY name ASC");
+    if ($branches_query) {
+        while($row = $branches_query->fetch_assoc()) {
+            $branches[] = $row;
+        }
     }
+} catch (Exception $e) {
+    // branches table not yet created — ignore, show empty list
+    $branches = [];
 }
 ?>
 <!DOCTYPE html>

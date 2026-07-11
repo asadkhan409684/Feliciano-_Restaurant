@@ -239,101 +239,17 @@ function initializeOrderModal() {
                 orderModal.classList.remove('active');
             }
 
-            // Remove any existing order type modal
-            const existingOrderTypeModal = document.querySelector('.order-type-modal');
-            if (existingOrderTypeModal) {
-                existingOrderTypeModal.remove();
+            // ── HYBRID AUTH CHECK ──────────────────────────────────────────
+            // currentUserEmail is set in PHP: const currentUserEmail = "<?= session email ?>"
+            const isLoggedIn = typeof currentUserEmail !== 'undefined' && currentUserEmail !== '';
+
+            if (!isLoggedIn) {
+                // Show login-or-guest modal
+                showAuthChoiceModal();
+            } else {
+                // Already logged in — go straight to order type selection
+                showOrderTypeModal();
             }
-
-            // Create order type selection modal
-            const orderTypeModal = document.createElement('div');
-            orderTypeModal.className = 'order-type-modal';
-            orderTypeModal.innerHTML = `
-                <div class="order-type-modal-content">
-                    <div class="order-modal-header">
-                        <h2>Choose Order Type</h2>
-                        <button class="close-btn" id="closeOrderTypeBtn">&times;</button>
-                    </div>
-                    <div class="order-type-options">
-                        <div class="order-type-option" data-type="online">
-                            <h3>🚚 Online Order</h3>
-                            <p>Delivered to your location</p>
-                        </div>
-                        <div class="order-type-option" data-type="offline">
-                            <h3>🏪 Offline Order</h3>
-                            <p>Pickup at restaurant</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(orderTypeModal);
-
-            // Force reflow and show modal
-            orderTypeModal.offsetHeight;
-            orderTypeModal.classList.add('active');
-
-            // Handle close button
-            const closeBtn = orderTypeModal.querySelector('#closeOrderTypeBtn');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function () {
-                    orderTypeModal.remove();
-                });
-            }
-
-            // Handle clicking outside modal
-            orderTypeModal.addEventListener('click', function (e) {
-                if (e.target === orderTypeModal) {
-                    orderTypeModal.remove();
-                }
-            });
-
-            // Handle order type selection
-            const orderOptions = orderTypeModal.querySelectorAll('.order-type-option');
-
-            orderOptions.forEach(option => {
-                option.addEventListener('click', function () {
-                    const orderType = this.getAttribute('data-type');
-
-                    // Calculate total
-                    const orders = JSON.parse(localStorage.getItem('felicianoOrders')) || [];
-                    let total = 0;
-                    orders.forEach(order => {
-                        total += order.price * order.quantity;
-                    });
-
-                    // Remove order type modal
-                    orderTypeModal.remove();
-
-                    // Show appropriate modal based on selection
-                    setTimeout(() => {
-                        if (orderType === 'online') {
-                            const onlineOrderTotal = document.getElementById('onlineOrderTotal');
-                            if (onlineOrderTotal) {
-                                onlineOrderTotal.textContent = `TK ${total.toLocaleString()}`;
-                            }
-
-                            const onlineModal = document.getElementById('onlineOrderModal');
-                            if (onlineModal) {
-                                onlineModal.classList.add('active');
-                                // Fetch and populate branches
-                                fetchBranchesForOrder();
-                            }
-
-                        } else if (orderType === 'offline') {
-                            const offlineOrderTotal = document.getElementById('offlineOrderTotal');
-                            if (offlineOrderTotal) {
-                                offlineOrderTotal.textContent = `TK ${total.toLocaleString()}`;
-                            }
-
-                            const offlineModal = document.getElementById('offlineOrderModal');
-                            if (offlineModal) {
-                                offlineModal.classList.add('active');
-                            }
-                        }
-                    }, 200);
-                });
-            });
         });
     }
 
@@ -759,6 +675,143 @@ function createBackToTop() {
 
     btn.addEventListener('click', function () {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// ── AUTH CHOICE MODAL (Login or Guest) ────────────────────────────────────────
+function showAuthChoiceModal() {
+    const existing = document.querySelector('.auth-choice-modal');
+    if (existing) existing.remove();
+
+    // Resolve login page path based on current URL depth
+    const loginPath = (() => {
+        const path = window.location.pathname;
+        if (path.includes('/pages/Profile/')) return '../../auth/login.php';
+        if (path.includes('/pages/'))         return '../auth/login.php';
+        return 'auth/login.php';
+    })();
+
+    const modal = document.createElement('div');
+    modal.className = 'auth-choice-modal order-type-modal';
+    modal.innerHTML = `
+        <div class="order-type-modal-content auth-choice-content">
+            <div class="order-modal-header">
+                <h2>Continue Your Order</h2>
+                <button class="close-btn" id="closeAuthChoiceBtn">&times;</button>
+            </div>
+            <div class="auth-choice-body">
+                <p class="auth-choice-subtitle">
+                    <i class="fas fa-info-circle"></i>
+                    লগইন করলে order history, tracking এবং profile-এ সব সুবিধা পাবেন।
+                </p>
+                <div class="auth-choice-options">
+                    <div class="auth-choice-card login-card">
+                        <div class="auth-choice-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Login / Register</h3>
+                        <p>Order track করুন, history দেখুন এবং exclusive সুবিধা উপভোগ করুন।</p>
+                        <ul class="auth-benefits">
+                            <li><i class="fas fa-check"></i> Order tracking</li>
+                            <li><i class="fas fa-check"></i> Order history</li>
+                            <li><i class="fas fa-check"></i> Faster checkout</li>
+                        </ul>
+                        <a href="${loginPath}" class="auth-choice-btn login-btn-choice">
+                            <i class="fas fa-sign-in-alt"></i> Login to Continue
+                        </a>
+                    </div>
+                    <div class="auth-choice-divider"><span>অথবা</span></div>
+                    <div class="auth-choice-card guest-card">
+                        <div class="auth-choice-icon guest-icon">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <h3>Guest হিসেবে Continue</h3>
+                        <p>Registration ছাড়াই order করুন। শুধু নাম ও ফোন নম্বর দিন।</p>
+                        <ul class="auth-benefits">
+                            <li><i class="fas fa-times" style="color:#888"></i> Order tracking নেই</li>
+                            <li><i class="fas fa-times" style="color:#888"></i> History save হবে না</li>
+                            <li><i class="fas fa-check"></i> দ্রুত ও সহজ</li>
+                        </ul>
+                        <button class="auth-choice-btn guest-btn-choice" id="continueAsGuestBtn">
+                            <i class="fas fa-arrow-right"></i> Guest হিসেবে Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.offsetHeight;
+    modal.classList.add('active');
+
+    modal.querySelector('#closeAuthChoiceBtn').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    modal.querySelector('#continueAsGuestBtn').addEventListener('click', () => {
+        modal.remove();
+        showOrderTypeModal();
+    });
+}
+
+// ── ORDER TYPE MODAL (Online / Offline) ───────────────────────────────────────
+function showOrderTypeModal() {
+    const existing = document.querySelector('.order-type-modal');
+    if (existing) existing.remove();
+
+    const orderTypeModal = document.createElement('div');
+    orderTypeModal.className = 'order-type-modal';
+    orderTypeModal.innerHTML = `
+        <div class="order-type-modal-content">
+            <div class="order-modal-header">
+                <h2>Choose Order Type</h2>
+                <button class="close-btn" id="closeOrderTypeBtn">&times;</button>
+            </div>
+            <div class="order-type-options">
+                <div class="order-type-option" data-type="online">
+                    <h3>🚚 Online Order</h3>
+                    <p>Delivered to your location</p>
+                </div>
+                <div class="order-type-option" data-type="offline">
+                    <h3>🏪 Offline Order</h3>
+                    <p>Dine-in at restaurant</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(orderTypeModal);
+    orderTypeModal.offsetHeight;
+    orderTypeModal.classList.add('active');
+
+    orderTypeModal.querySelector('#closeOrderTypeBtn').addEventListener('click', () => orderTypeModal.remove());
+    orderTypeModal.addEventListener('click', e => { if (e.target === orderTypeModal) orderTypeModal.remove(); });
+
+    orderTypeModal.querySelectorAll('.order-type-option').forEach(option => {
+        option.addEventListener('click', function () {
+            const orderType = this.getAttribute('data-type');
+            const orders = JSON.parse(localStorage.getItem('felicianoOrders')) || [];
+            let total = 0;
+            orders.forEach(order => { total += order.price * order.quantity; });
+
+            orderTypeModal.remove();
+
+            setTimeout(() => {
+                if (orderType === 'online') {
+                    const el = document.getElementById('onlineOrderTotal');
+                    if (el) el.textContent = `TK ${total.toLocaleString()}`;
+                    const onlineModal = document.getElementById('onlineOrderModal');
+                    if (onlineModal) {
+                        onlineModal.classList.add('active');
+                        fetchBranchesForOrder();
+                    }
+                } else if (orderType === 'offline') {
+                    const el = document.getElementById('offlineOrderTotal');
+                    if (el) el.textContent = `TK ${total.toLocaleString()}`;
+                    const offlineModal = document.getElementById('offlineOrderModal');
+                    if (offlineModal) offlineModal.classList.add('active');
+                }
+            }, 200);
+        });
     });
 }
 

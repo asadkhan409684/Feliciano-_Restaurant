@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 10, 2026 at 07:52 AM
+-- Generation Time: Jul 09, 2026 at 08:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,6 +35,7 @@ CREATE TABLE `admin_notifications` (
   `message` text NOT NULL,
   `related_id` varchar(50) DEFAULT NULL,
   `is_read` tinyint(1) DEFAULT 0,
+  `branch_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -42,12 +43,28 @@ CREATE TABLE `admin_notifications` (
 -- Dumping data for table `admin_notifications`
 --
 
-INSERT INTO `admin_notifications` (`id`, `notification_id`, `type`, `title`, `message`, `related_id`, `is_read`, `created_at`) VALUES
-(1, NULL, 'order', 'New Order Received', 'Order ORD-20260308-6480 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-6480', 0, '2026-03-08 21:05:29'),
-(2, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1942 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1942', 0, '2026-03-08 21:09:33'),
-(3, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1920 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1920', 0, '2026-03-08 21:10:10'),
-(4, NULL, 'order', 'New Order Received', 'Order ORD-20260308-8103 received from Bani Amin ()', 'ORD-20260308-8103', 0, '2026-03-08 21:58:42'),
-(5, NULL, 'order', 'New Order Received', 'Order ORD-20260308-4180 received from bani amin (baniamin@gmail.com)', 'ORD-20260308-4180', 0, '2026-03-08 22:05:39');
+INSERT INTO `admin_notifications` (`id`, `notification_id`, `type`, `title`, `message`, `related_id`, `is_read`, `branch_id`, `created_at`) VALUES
+(1, NULL, 'order', 'New Order Received', 'Order ORD-20260308-6480 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-6480', 0, NULL, '2026-03-08 21:05:29'),
+(2, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1942 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1942', 0, NULL, '2026-03-08 21:09:33'),
+(3, NULL, 'order', 'New Order Received', 'Order ORD-20260308-1920 received from Asad Khan (asadkhan409684@gmail.com)', 'ORD-20260308-1920', 0, NULL, '2026-03-08 21:10:10'),
+(4, NULL, 'order', 'New Order Received', 'Order ORD-20260308-8103 received from Bani Amin ()', 'ORD-20260308-8103', 0, NULL, '2026-03-08 21:58:42'),
+(5, NULL, 'order', 'New Order Received', 'Order ORD-20260308-4180 received from bani amin (baniamin@gmail.com)', 'ORD-20260308-4180', 0, NULL, '2026-03-08 22:05:39');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `branches`
+--
+
+CREATE TABLE `branches` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `location` text DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -154,6 +171,7 @@ CREATE TABLE `orders` (
   `delivery_address` text DEFAULT NULL,
   `delivery_time` datetime DEFAULT NULL,
   `special_instructions` text DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `subtotal` decimal(10,2) NOT NULL,
   `tax` decimal(10,2) DEFAULT 0.00,
   `total_amount` decimal(10,2) NOT NULL,
@@ -167,11 +185,11 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `order_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `order_type`, `table_number`, `delivery_address`, `delivery_time`, `special_instructions`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `created_at`, `updated_at`) VALUES
-(4, 'ORD-20260308-6480', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', NULL, 'kazipara', '2026-03-09 15:05:00', NULL, 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:05:29', '2026-03-08 21:38:48'),
-(5, 'ORD-20260308-1942', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', '', 'kazipara', '2026-03-09 15:05:00', '', 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:09:33', '2026-03-08 21:15:19'),
-(7, 'ORD-20260308-8103', NULL, 'Bani Amin', '', '01234567891', 'offline', '1', '', NULL, 'Make good', 670.00, 0.00, 670.00, 'preparing', 'pending', '2026-03-08 21:58:42', '2026-03-08 22:03:05'),
-(8, 'ORD-20260308-4180', NULL, 'bani amin', 'baniamin@gmail.com', '01324567891', 'online', '', 'kazipara', '2026-03-10 16:05:00', 'dfds', 100.00, 0.00, 100.00, 'pending', 'pending', '2026-03-08 22:05:39', '2026-03-08 22:05:39');
+INSERT INTO `orders` (`id`, `order_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `order_type`, `table_number`, `delivery_address`, `delivery_time`, `special_instructions`, `branch_id`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `created_at`, `updated_at`) VALUES
+(4, 'ORD-20260308-6480', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', NULL, 'kazipara', '2026-03-09 15:05:00', NULL, NULL, 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:05:29', '2026-03-08 21:38:48'),
+(5, 'ORD-20260308-1942', NULL, 'Asad Khan', 'asadkhan409684@gmail.com', '01772353298', 'online', '', 'kazipara', '2026-03-09 15:05:00', '', NULL, 700.00, 0.00, 700.00, 'completed', 'pending', '2026-03-08 21:09:33', '2026-03-08 21:15:19'),
+(7, 'ORD-20260308-8103', NULL, 'Bani Amin', '', '01234567891', 'offline', '1', '', NULL, 'Make good', NULL, 670.00, 0.00, 670.00, 'preparing', 'pending', '2026-03-08 21:58:42', '2026-03-08 22:03:05'),
+(8, 'ORD-20260308-4180', NULL, 'bani amin', 'baniamin@gmail.com', '01324567891', 'online', '', 'kazipara', '2026-03-10 16:05:00', 'dfds', NULL, 100.00, 0.00, 100.00, 'pending', 'pending', '2026-03-08 22:05:39', '2026-03-08 22:05:39');
 
 -- --------------------------------------------------------
 
@@ -239,6 +257,7 @@ CREATE TABLE `reservations` (
   `guests_count` int(11) NOT NULL,
   `occasion` enum('birthday','anniversary','business','date','family','other') DEFAULT 'other',
   `special_requests` text DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `status` enum('pending','confirmed','cancelled','completed') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -248,8 +267,8 @@ CREATE TABLE `reservations` (
 -- Dumping data for table `reservations`
 --
 
-INSERT INTO `reservations` (`id`, `reservation_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `reservation_date`, `reservation_time`, `guests_count`, `occasion`, `special_requests`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'RES-20260308-4779AA8A', NULL, 'Bani Amin', 'baniamin@gmail.com', '01324567891', '2026-03-10', '20:00:00', 6, 'family', 'fgfd', 'confirmed', '2026-03-08 21:59:34', '2026-03-08 22:02:45');
+INSERT INTO `reservations` (`id`, `reservation_id`, `customer_id`, `customer_name`, `customer_email`, `customer_phone`, `reservation_date`, `reservation_time`, `guests_count`, `occasion`, `special_requests`, `branch_id`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'RES-20260308-4779AA8A', NULL, 'Bani Amin', 'baniamin@gmail.com', '01324567891', '2026-03-10', '20:00:00', 6, 'family', 'fgfd', NULL, 'confirmed', '2026-03-08 21:59:34', '2026-03-08 22:02:45');
 
 -- --------------------------------------------------------
 
@@ -371,10 +390,13 @@ CREATE TABLE `users` (
   `role` enum('admin','customer','staff','manager') DEFAULT 'customer',
   `password` varchar(255) NOT NULL,
   `status` enum('active','inactive','suspended') DEFAULT 'active',
+  `branch_id` int(11) DEFAULT NULL,
   `terms_accepted` tinyint(1) DEFAULT 0,
   `login_attempts` int(11) DEFAULT 0,
   `last_login_attempt` datetime DEFAULT NULL,
   `account_locked` tinyint(1) DEFAULT 0,
+  `profile_avatar` varchar(255) DEFAULT NULL,
+  `profile_hero` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -383,10 +405,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `last_name`, `full_name`, `email`, `phone`, `role`, `password`, `status`, `terms_accepted`, `login_attempts`, `last_login_attempt`, `account_locked`, `created_at`, `updated_at`) VALUES
-(2, 'Asad', 'Khan', 'Asad khan', 'asadkhan405896@gmail.com', '+8801772353298', 'admin', '$2y$10$S3lKpwKhOU6ITx0QlxPE3uQ4C2MEqUQzgLWdg0lvYPqeVrgu8vBLy', 'active', 0, 0, NULL, 0, '2026-03-08 18:18:39', '2026-03-08 18:18:39'),
-(3, 'Mosabbir', 'Isalm', 'Mosabbir Isalm', 'mosabbir@gmail.com', NULL, 'manager', '$2y$10$JSY/92BTlwXJFMGzcrK9p.QfKdV/wTjGiRSPgwfGRXrIxwNDKsPK2', 'active', 1, 0, NULL, 0, '2026-03-08 18:19:31', '2026-03-08 19:03:15'),
-(4, 'Bani', 'Amin', 'Bani Amin', 'baniamin@gmail.com', '01745623891', 'customer', '$2y$10$2JGARpR9maVU.YgBBdhZ..Ub6TBiCzthcE0bbztrWH1lvYHgy7aga', 'active', 1, 0, NULL, 0, '2026-03-08 21:52:07', '2026-03-08 21:52:07');
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `full_name`, `email`, `phone`, `role`, `password`, `status`, `branch_id`, `terms_accepted`, `login_attempts`, `last_login_attempt`, `account_locked`, `profile_avatar`, `profile_hero`, `created_at`, `updated_at`) VALUES
+(2, 'Asad', 'Khan', 'Asad khan', 'asadkhan405896@gmail.com', '+8801772353298', 'admin', '$2y$10$S3lKpwKhOU6ITx0QlxPE3uQ4C2MEqUQzgLWdg0lvYPqeVrgu8vBLy', 'active', NULL, 0, 0, NULL, 0, NULL, NULL, '2026-03-08 18:18:39', '2026-03-08 18:18:39'),
+(3, 'Mosabbir', 'Isalm', 'Mosabbir Isalm', 'mosabbir@gmail.com', NULL, 'manager', '$2y$10$JSY/92BTlwXJFMGzcrK9p.QfKdV/wTjGiRSPgwfGRXrIxwNDKsPK2', 'active', NULL, 1, 0, NULL, 0, NULL, NULL, '2026-03-08 18:19:31', '2026-03-08 19:03:15'),
+(4, 'Bani', 'Amin', 'Bani Amin', 'baniamin@gmail.com', '01745623891', 'customer', '$2y$10$2JGARpR9maVU.YgBBdhZ..Ub6TBiCzthcE0bbztrWH1lvYHgy7aga', 'active', NULL, 1, 0, NULL, 0, NULL, NULL, '2026-03-08 21:52:07', '2026-03-08 21:52:07');
 
 -- --------------------------------------------------------
 
@@ -443,6 +465,12 @@ ALTER TABLE `admin_notifications`
   ADD UNIQUE KEY `notification_id` (`notification_id`),
   ADD KEY `idx_is_read` (`is_read`),
   ADD KEY `idx_created_at` (`created_at`);
+
+--
+-- Indexes for table `branches`
+--
+ALTER TABLE `branches`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `customers`
@@ -558,6 +586,12 @@ ALTER TABLE `user_sessions`
 --
 ALTER TABLE `admin_notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `branches`
+--
+ALTER TABLE `branches`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `customers`
