@@ -1,81 +1,125 @@
-<!-- Orders Section -->
+<!-- ===== ORDERS MANAGEMENT SECTION ===== -->
 <section id="orders" class="admin-section">
     <div class="section-header">
-        <h2>Orders Management</h2>
-        <div class="order-filters" style="display: flex; gap: 10px;">
-            <select id="orderDateFilter" onchange="filterOrders()">
+        <div><h2><i class="fas fa-shopping-cart me-2"></i>Order Management</h2><p>Track and manage all restaurant orders</p></div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <select id="orderDateFilter" class="form-select form-select-sm" onchange="filterOrders()" style="width:130px">
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
                 <option value="7days">Last 7 Days</option>
                 <option value="30days">Last 30 Days</option>
             </select>
-            <select id="orderStatusFilter" onchange="filterOrders()">
-                <option value="all">All Orders</option>
+            <select id="orderStatusFilter" class="form-select form-select-sm" onchange="filterOrders()" style="width:150px">
+                <option value="all">All Status</option>
                 <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
                 <option value="preparing">Preparing</option>
                 <option value="ready">Ready</option>
+                <option value="out_for_delivery">Out for Delivery</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
+                <option value="refunded">Refunded</option>
             </select>
+            <select id="orderTypeFilter" class="form-select form-select-sm" onchange="filterOrders()" style="width:130px">
+                <option value="all">All Types</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+                <option value="walk-in">Walk-in</option>
+            </select>
+            <!-- Export buttons -->
+            <div class="d-flex gap-1 ms-1">
+                <button class="rpt-export-btn rpt-btn-csv" onclick="quickExport('orders','csv')" title="Export as CSV">
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+                <button class="rpt-export-btn rpt-btn-print" onclick="quickExport('orders','print')" title="Print / PDF">
+                    <i class="fas fa-print"></i> PDF
+                </button>
+            </div>
         </div>
     </div>
-    
-    <div id="orderAnalyticsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        <!-- Analytics cards will be populated here via admin-script.js -->
-    </div>
-    
-    <div class="orders-table-container">
+
+    <!-- Order Quick Stats -->
+    <div id="orderAnalyticsGrid" class="stats-grid mb-4" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"></div>
+
+    <div class="orders-table-container table-responsive">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width: 150px;">Order ID</th>
+                    <th>Order ID</th>
                     <th>Customer Info</th>
-                    <th style="width: 150px; text-align: center;">Order Type</th>
-                    <th style="width: 180px;">Date & Time</th>
-                    <th style="width: 120px;">Total</th>
-                    <th style="width: 140px; text-align: center;">Status</th>
-                    <th style="width: 100px; text-align: center;">Details</th>
+                    <th>Type</th>
+                    <th>Items</th>
+                    <th>Date & Time</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th style="text-align:center">Action</th>
                 </tr>
             </thead>
             <tbody id="ordersTableBody">
-                <!-- Orders will be populated here via admin-script.js -->
+                <tr><td colspan="8" class="text-center py-4"><i class="fas fa-spinner fa-spin me-2"></i>Loading orders...</td></tr>
             </tbody>
         </table>
     </div>
 </section>
 
-<!-- View Order Modal -->
+<!-- Order Detail Modal -->
 <div id="editOrderModal" class="modal">
-    <div class="modal-content" style="max-width: 650px; border-radius: 12px; overflow: hidden; padding: 0;">
-        <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 1px solid #e0e6ed; padding: 20px 30px;">
-            <h3 id="editOrderModalTitle" style="margin: 0; color: #2c3e50; font-size: 1.25rem;">View Order Details</h3>
-            <button class="close-modal" onclick="closeEditOrderModal()" style="font-size: 1.5rem; color: #7f8c8d; background: transparent; border: none; cursor: pointer;">&times;</button>
+    <div class="modal-content" style="max-width:700px;padding:0">
+        <div class="modal-header">
+            <h3>Order Details — <span id="editOrderModalTitle"></span></h3>
+            <button class="close-modal" onclick="closeEditOrderModal()" style="font-size:1.5rem;background:none;border:none;cursor:pointer;color:#7f8c8d">&times;</button>
         </div>
-        <div style="padding: 30px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">
-                <div style="font-size: 1rem; line-height: 1.8; color: #475569;">
-                    <div style="margin-bottom: 5px;"><strong style="color: #1e293b; display: inline-block; width: 90px;">Order ID:</strong> <span id="viewOrderId" style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;"></span></div>
-                    <div style="margin-bottom: 5px;"><strong style="color: #1e293b; display: inline-block; width: 90px;">Date:</strong> <span id="viewOrderDate"></span></div>
-                    <div><strong style="color: #1e293b; display: inline-block; width: 90px;">Customer:</strong> <span id="viewOrderCustomer"></span></div>
+        <div style="padding:25px">
+            <!-- Order Info Row -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <table class="table table-sm table-borderless">
+                        <tr><td class="fw-bold text-muted" style="width:110px">Order ID</td><td><code id="viewOrderId"></code></td></tr>
+                        <tr><td class="fw-bold text-muted">Date</td><td id="viewOrderDate"></td></tr>
+                        <tr><td class="fw-bold text-muted">Customer</td><td id="viewOrderCustomer"></td></tr>
+                        <tr><td class="fw-bold text-muted">Phone</td><td id="viewOrderPhone"></td></tr>
+                        <tr><td class="fw-bold text-muted">Type</td><td id="viewOrderType"></td></tr>
+                    </table>
                 </div>
-                <div style="text-align: right; display: flex; flex-direction: column; justify-content: center;">
-                    <strong style="color: #1e293b; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</strong>
-                    <span id="viewOrderStatus" class="order-status" style="display: inline-block; padding: 6px 12px; font-size: 0.95rem; border-radius: 20px;"></span>
+                <div class="col-md-6 text-end">
+                    <div class="mb-2"><strong>Current Status</strong></div>
+                    <span id="viewOrderStatus" class="order-status-pill"></span>
+                    <div class="mt-3">
+                        <label class="fw-bold text-muted d-block mb-1">Update Status</label>
+                        <select id="orderStatusUpdate" class="form-select form-select-sm" style="width:180px;display:inline-block">
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="preparing">Preparing</option>
+                            <option value="ready">Ready</option>
+                            <option value="out_for_delivery">Out for Delivery</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm ms-2" onclick="saveOrderStatusFromModal()"><i class="fas fa-save"></i></button>
+                    </div>
                 </div>
             </div>
-            
-            <h4 style="margin-bottom: 15px; font-size: 1.15rem; color: #1e293b; border-left: 4px solid #3498db; padding-left: 10px;">Order Items</h4>
-            <div id="viewOrderItems" style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e2e8f0; font-size: 1rem;">
-                <!-- Items will be injected here via JS -->
+            <!-- Order Items -->
+            <h5 class="border-start border-4 ps-2 mb-3" style="border-color:#3498db!important">Order Items</h5>
+            <div id="viewOrderItems" class="bg-light p-3 rounded mb-3" style="border:1px solid #e2e8f0"></div>
+            <div class="text-end fw-bold fs-5">Grand Total: TK <span id="viewOrderTotal"></span></div>
+            <!-- Delivery Address -->
+            <div id="viewDeliveryAddressRow" class="mt-3 p-3 bg-light rounded" style="display:none">
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                <strong>Delivery Address:</strong> <span id="viewDeliveryAddress"></span>
             </div>
-            
-            <div style="text-align: right; font-size: 1.3rem; margin-bottom: 30px; color: #0f172a; background: #f1f5f9; padding: 15px 20px; border-radius: 8px; display: inline-block; float: right;">
-                Grand Total: <strong style="color: #2c3e50;">TK <span id="viewOrderTotal"></span></strong>
+            <!-- Special Instructions -->
+            <div id="viewSpecialInstructionsRow" class="mt-2 p-3 bg-light rounded" style="display:none">
+                <i class="fas fa-sticky-note text-warning me-2"></i>
+                <strong>Special Instructions:</strong> <span id="viewSpecialInstructions"></span>
             </div>
-            <div style="clear: both;"></div>
-            
-            <div class="form-actions" style="justify-content: flex-end; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-                <button type="button" class="btn btn-secondary" onclick="closeEditOrderModal()" style="padding: 10px 25px; font-weight: 500; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;">Close Window</button>
+            <div class="d-flex justify-content-between mt-4 border-top pt-3">
+                <button class="btn btn-danger btn-sm" onclick="deleteOrderFromModal()"><i class="fas fa-trash me-1"></i>Delete Order</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-info btn-sm text-white" onclick="openInvoiceModal()"><i class="fas fa-file-invoice me-1"></i>Invoice</button>
+                    <button class="btn btn-secondary" onclick="closeEditOrderModal()">Close</button>
+                </div>
             </div>
         </div>
     </div>

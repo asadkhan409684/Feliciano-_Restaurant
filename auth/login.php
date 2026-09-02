@@ -39,6 +39,8 @@ if (!isset($_SESSION['user_logged_in']) && isset($_COOKIE['remember_token'])) {
             header("Location: ../admin/admin.php");
         } elseif ($_SESSION['user_role'] == 'manager') {
             header("Location: ../manager/index.php");
+        } elseif (in_array($_SESSION['user_role'], ['chef','waiter','cashier'])) {
+            header("Location: ../admin/admin.php");
         } else {
             header("Location: ../index.php");
         }
@@ -88,12 +90,22 @@ if(isset($_POST['login'])){
                     $resetStmt = $conn->prepare("UPDATE users SET login_attempts = 0, account_locked = 0 WHERE id = ?");
                     $resetStmt->bind_param("i", $user['id']);
                     $resetStmt->execute();
+
+                    // Log login history
+                    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+                    $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+                    $lh = $conn->prepare("INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status) VALUES (?,?,?,?,'success')");
+                    $lh->bind_param("isss", $user['id'], $user['full_name'], $ip, $ua);
+                    $lh->execute();
                     
                     // Role based redirection
                     if ($user['role'] == 'admin') {
                         header("Location: ../admin/admin.php");
                     } elseif ($user['role'] == 'manager') {
                         header("Location: ../manager/index.php");
+                    } elseif (in_array($user['role'], ['chef','waiter','cashier'])) {
+                        // Staff roles → restricted admin panel
+                        header("Location: ../admin/admin.php");
                     } else {
                         header("Location: ../index.php");
                     }

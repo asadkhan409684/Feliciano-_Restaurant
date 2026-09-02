@@ -140,3 +140,56 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Out of Stock styles ───────────────────────────────── */
+.card-image-container {
+    position: relative;
+}
+
+.img-grayscale {
+    filter: grayscale(70%) brightness(0.75);
+}
+
+.out-of-stock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2;
+    border-radius: inherit;
+}
+
+.out-of-stock-badge {
+    background: rgba(220, 38, 38, 0.92);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,.35);
+    backdrop-filter: blur(4px);
+    text-transform: uppercase;
+}
+
+.order-btn-disabled {
+    background: #4b5563 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+    color: #9ca3af !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.order-btn-disabled:hover {
+    background: #4b5563 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}

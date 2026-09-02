@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `admin_notifications`
 --
 
-CREATE TABLE `admin_notifications` (
+CREATE TABLE IF NOT EXISTS `admin_notifications` (
   `id` int(11) NOT NULL,
   `notification_id` bigint(20) DEFAULT NULL,
   `type` enum('order','reservation','system','other') DEFAULT 'order',
@@ -56,7 +56,7 @@ INSERT INTO `admin_notifications` (`id`, `notification_id`, `type`, `title`, `me
 -- Table structure for table `branches`
 --
 
-CREATE TABLE `branches` (
+CREATE TABLE IF NOT EXISTS `branches` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `location` text DEFAULT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE `branches` (
 -- Table structure for table `customers`
 --
 
-CREATE TABLE `customers` (
+CREATE TABLE IF NOT EXISTS `customers` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `customer_id` varchar(50) NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE `customers` (
 -- Stand-in structure for view `customer_analytics`
 -- (See below for the actual view)
 --
-CREATE TABLE `customer_analytics` (
+CREATE TABLE IF NOT EXISTS `customer_analytics` (
 `id` int(11)
 ,`customer_id` varchar(50)
 ,`full_name` varchar(100)
@@ -111,7 +111,7 @@ CREATE TABLE `customer_analytics` (
 -- Stand-in structure for view `daily_sales_summary`
 -- (See below for the actual view)
 --
-CREATE TABLE `daily_sales_summary` (
+CREATE TABLE IF NOT EXISTS `daily_sales_summary` (
 `sale_date` date
 ,`total_orders` bigint(21)
 ,`total_revenue` decimal(32,2)
@@ -124,7 +124,7 @@ CREATE TABLE `daily_sales_summary` (
 -- Table structure for table `menu_items`
 --
 
-CREATE TABLE `menu_items` (
+CREATE TABLE IF NOT EXISTS `menu_items` (
   `id` int(11) NOT NULL,
   `menu_id` int(11) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
@@ -159,7 +159,7 @@ INSERT INTO `menu_items` (`id`, `menu_id`, `name`, `description`, `category`, `p
 -- Table structure for table `orders`
 --
 
-CREATE TABLE `orders` (
+CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL,
   `order_id` varchar(50) NOT NULL,
   `customer_id` int(11) DEFAULT NULL,
@@ -197,7 +197,7 @@ INSERT INTO `orders` (`id`, `order_id`, `customer_id`, `customer_name`, `custome
 -- Table structure for table `order_items`
 --
 
-CREATE TABLE `order_items` (
+CREATE TABLE IF NOT EXISTS `order_items` (
   `id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL,
   `menu_item_id` int(11) NOT NULL,
@@ -230,7 +230,7 @@ INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `menu_item_name`, `
 -- Stand-in structure for view `popular_menu_items`
 -- (See below for the actual view)
 --
-CREATE TABLE `popular_menu_items` (
+CREATE TABLE IF NOT EXISTS `popular_menu_items` (
 `id` int(11)
 ,`name` varchar(100)
 ,`category` varchar(50)
@@ -245,7 +245,7 @@ CREATE TABLE `popular_menu_items` (
 -- Table structure for table `reservations`
 --
 
-CREATE TABLE `reservations` (
+CREATE TABLE IF NOT EXISTS `reservations` (
   `id` int(11) NOT NULL,
   `reservation_id` varchar(50) NOT NULL,
   `customer_id` int(11) DEFAULT NULL,
@@ -276,7 +276,7 @@ INSERT INTO `reservations` (`id`, `reservation_id`, `customer_id`, `customer_nam
 -- Table structure for table `restaurant_settings`
 --
 
-CREATE TABLE `restaurant_settings` (
+CREATE TABLE IF NOT EXISTS `restaurant_settings` (
   `id` int(11) NOT NULL,
   `setting_key` varchar(50) NOT NULL,
   `setting_value` text DEFAULT NULL,
@@ -305,7 +305,7 @@ INSERT INTO `restaurant_settings` (`id`, `setting_key`, `setting_value`, `settin
 -- Table structure for table `reviews`
 --
 
-CREATE TABLE `reviews` (
+CREATE TABLE IF NOT EXISTS `reviews` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `customer_name` varchar(100) DEFAULT NULL,
@@ -321,7 +321,7 @@ CREATE TABLE `reviews` (
 -- Table structure for table `roles`
 --
 
-CREATE TABLE `roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
   `id` int(11) NOT NULL,
   `role_name` varchar(50) NOT NULL,
   `description` text DEFAULT NULL,
@@ -344,7 +344,7 @@ INSERT INTO `roles` (`id`, `role_name`, `description`, `created_at`) VALUES
 -- Table structure for table `subscribers`
 --
 
-CREATE TABLE `subscribers` (
+CREATE TABLE IF NOT EXISTS `subscribers` (
   `id` int(11) NOT NULL,
   `email` varchar(100) NOT NULL,
   `subscribed_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -364,7 +364,7 @@ INSERT INTO `subscribers` (`id`, `email`, `subscribed_at`, `status`) VALUES
 -- Table structure for table `tables`
 --
 
-CREATE TABLE `tables` (
+CREATE TABLE IF NOT EXISTS `tables` (
   `id` int(11) NOT NULL,
   `table_number` varchar(20) NOT NULL,
   `capacity` int(11) NOT NULL,
@@ -380,14 +380,14 @@ CREATE TABLE `tables` (
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `full_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `role` enum('admin','customer','staff','manager') DEFAULT 'customer',
+  `role` enum('admin','customer','manager','chef','waiter','cashier') DEFAULT 'customer',
   `password` varchar(255) NOT NULL,
   `status` enum('active','inactive','suspended') DEFAULT 'active',
   `branch_id` int(11) DEFAULT NULL,
@@ -416,7 +416,7 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `full_name`, `email`, `pho
 -- Table structure for table `user_sessions`
 --
 
-CREATE TABLE `user_sessions` (
+CREATE TABLE IF NOT EXISTS `user_sessions` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `session_token` varchar(255) NOT NULL,
@@ -705,6 +705,387 @@ ALTER TABLE `reviews`
 --
 ALTER TABLE `user_sessions`
   ADD CONSTRAINT `user_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+-- --------------------------------------------------------
+-- NEW TABLES (Dynamic — previously auto-created by PHP)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `menu_categories`
+--
+
+CREATE TABLE IF NOT EXISTS `menu_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `icon` varchar(80) DEFAULT 'fa-tag',
+  `description` text DEFAULT NULL,
+  `sort_order` int(11) DEFAULT 0,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Default seed data for `menu_categories`
+--
+
+INSERT IGNORE INTO `menu_categories` (`name`, `slug`, `icon`, `sort_order`) VALUES
+('Breakfast',          'breakfast',          'fa-egg',          0),
+('Platters',           'platter',            'fa-plate-wheat',  1),
+('Meal Deals',         'meal-deal',          'fa-boxes-stacked',2),
+('Signature Dishes',   'signature',          'fa-star',         3),
+('Pizza',              'pizza',              'fa-pizza-slice',  4),
+('Burger',             'burger',             'fa-burger',       5),
+('Pasta & Chowmein',   'pasta & chowmein',   'fa-bowl-food',    6),
+('Sandwiches',         'sandwiches',         'fa-sandwich',     7),
+('Savory Waffle',      'savory waffle',      'fa-waffle',       8),
+('Soup & Ramen',       'soup & ramen',       'fa-bowl-hot',     9),
+('Fresh Salad',        'fresh salad',        'fa-leaf',         10),
+('Dessert',            'dessert',            'fa-ice-cream',    11),
+('Sugary Waffle',      'sugary waffle',      'fa-waffle',       12),
+('Frappuccino',        'frappuccino',        'fa-blender',      13),
+('Mocktail',           'mocktail',           'fa-glass-water',  14),
+('Milk Shake',         'milk shake',         'fa-glass-citrus', 15),
+('Fresh Juice',        'fresh juice',        'fa-lemon',        16),
+('Hot Coffee',         'hot coffee',         'fa-mug-hot',      17),
+('Iced Coffee',        'iced coffee',        'fa-mug-saucer',   18),
+('Side Dishes',        'side dishes',        'fa-utensils',     19),
+('Early Meal Add-ons', 'early meal add ons', 'fa-plus-circle',  20);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory`
+--
+
+CREATE TABLE IF NOT EXISTS `inventory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `category` varchar(50) DEFAULT 'ingredient',
+  `unit` varchar(20) DEFAULT 'kg',
+  `stock_quantity` decimal(10,2) DEFAULT 0.00,
+  `min_stock` decimal(10,2) DEFAULT 0.00,
+  `expiry_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `suppliers`
+--
+
+CREATE TABLE IF NOT EXISTS `suppliers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `products` text DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `payment_due` decimal(10,2) DEFAULT 0.00,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `purchases`
+--
+
+CREATE TABLE IF NOT EXISTS `purchases` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `po_number` varchar(30) DEFAULT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `supplier_name` varchar(150) DEFAULT NULL,
+  `items` text DEFAULT NULL,
+  `total_amount` decimal(10,2) DEFAULT 0.00,
+  `purchase_date` date NOT NULL,
+  `payment_status` enum('pending','paid','partial') DEFAULT 'pending',
+  `status` enum('ordered','received','cancelled') DEFAULT 'ordered',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `supplier_id` (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `combo_meals`
+--
+
+CREATE TABLE IF NOT EXISTS `combo_meals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `description` text DEFAULT NULL,
+  `items` text DEFAULT NULL,
+  `original_price` decimal(10,2) DEFAULT 0.00,
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gallery`
+--
+
+CREATE TABLE IF NOT EXISTS `gallery` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(150) DEFAULT NULL,
+  `image_url` varchar(255) NOT NULL,
+  `category` enum('food','restaurant','event','other') DEFAULT 'food',
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE IF NOT EXISTS `events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `type` varchar(50) DEFAULT 'other',
+  `description` text DEFAULT NULL,
+  `event_date` date DEFAULT NULL,
+  `capacity` int(11) DEFAULT 0,
+  `price` decimal(10,2) DEFAULT 0.00,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expenses`
+--
+
+CREATE TABLE IF NOT EXISTS `expenses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `expense_date` date NOT NULL,
+  `category` varchar(50) DEFAULT 'other',
+  `description` text DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupons`
+--
+
+CREATE TABLE IF NOT EXISTS `coupons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `discount_type` enum('percentage','fixed','free_delivery','bogo') DEFAULT 'percentage',
+  `discount_value` decimal(10,2) DEFAULT 0.00,
+  `min_order` decimal(10,2) DEFAULT 0.00,
+  `usage_limit` int(11) DEFAULT 0,
+  `used_count` int(11) DEFAULT 0,
+  `expiry_date` date DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_attendance`
+--
+
+CREATE TABLE IF NOT EXISTS `staff_attendance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `attendance_date` date NOT NULL,
+  `status` enum('present','absent','half_day','late') DEFAULT 'present',
+  `check_in` time DEFAULT NULL,
+  `check_out` time DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_attendance` (`user_id`,`attendance_date`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_salary`
+--
+
+CREATE TABLE IF NOT EXISTS `staff_salary` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `month` varchar(7) NOT NULL,
+  `base_salary` decimal(10,2) DEFAULT 0.00,
+  `bonus` decimal(10,2) DEFAULT 0.00,
+  `deduction` decimal(10,2) DEFAULT 0.00,
+  `net_salary` decimal(10,2) DEFAULT 0.00,
+  `payment_status` enum('pending','paid') DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_salary` (`user_id`,`month`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_loyalty`
+--
+
+CREATE TABLE IF NOT EXISTS `customer_loyalty` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `points` int(11) DEFAULT 0,
+  `total_earned` int(11) DEFAULT 0,
+  `total_redeemed` int(11) DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `login_history`
+--
+
+CREATE TABLE IF NOT EXISTS `login_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(150) DEFAULT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `status` enum('success','failed') DEFAULT 'success',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_logs`
+--
+
+CREATE TABLE IF NOT EXISTS `system_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` enum('order','payment','reservation','inventory','staff','login','error','system') NOT NULL DEFAULT 'system',
+  `event_type` varchar(80) NOT NULL DEFAULT '',
+  `message` text NOT NULL,
+  `related_id` int(11) DEFAULT NULL,
+  `related_label` varchar(120) DEFAULT NULL,
+  `status` varchar(40) NOT NULL DEFAULT 'info',
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(150) DEFAULT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_category` (`category`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+CREATE TABLE IF NOT EXISTS `role_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role` varchar(50) NOT NULL,
+  `section` varchar(80) NOT NULL,
+  `allowed` tinyint(1) NOT NULL DEFAULT 1,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_section` (`role`, `section`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `menu_item_images`
+--
+
+CREATE TABLE IF NOT EXISTS `menu_item_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `menu_item_id` int(11) NOT NULL,
+  `image_url` varchar(500) NOT NULL,
+  `sort_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_menu_item_id` (`menu_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_ratings`
+--
+
+CREATE TABLE IF NOT EXISTS `staff_ratings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `month` varchar(7) NOT NULL,
+  `rating` decimal(3,1) DEFAULT 0.0,
+  `review` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_rating` (`user_id`, `month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `testimonials`
+--
+
+CREATE TABLE IF NOT EXISTS `testimonials` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(120) NOT NULL,
+  `designation` varchar(120) DEFAULT '',
+  `content` text NOT NULL,
+  `rating` tinyint(1) DEFAULT 5,
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `sort_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `faqs`
+--
+
+CREATE TABLE IF NOT EXISTS `faqs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `question` text NOT NULL,
+  `answer` text NOT NULL,
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `sort_order` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

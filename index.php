@@ -2,6 +2,8 @@
 session_start(); 
 require_once 'config/database.php';
 require_once 'config/categories.php';
+require_once 'config/settings_helper.php';
+$settings = get_restaurant_settings($conn);
 
 function getFeaturedItems($conn, $category, $limit = 4) {
     $stmt = $conn->prepare("SELECT * FROM menu_items WHERE category = ? AND status = 'active' LIMIT ?");
@@ -31,11 +33,12 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feliciano - Best Restaurant</title>
+    <title><?php echo htmlspecialchars($settings['restaurant_name']); ?> - Best Restaurant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="assets/css/home.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <?php $logo_url = get_logo_url($settings); ?>
+    <link rel="icon" type="image/png" href="<?php echo $logo_url; ?>">
 </head>
 
 <body>
@@ -48,7 +51,12 @@ if (isset($_SESSION['user_id'])) {
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="index.php" class="logo">Feliciano<span>.</span></a>
+            <a href="index.php" class="logo">
+                <?php if (!empty($settings['restaurant_logo'])): ?>
+                    <img src="<?php echo get_logo_url($settings); ?>" alt="<?php echo htmlspecialchars($settings['restaurant_name']); ?>" style="height:40px;width:auto;vertical-align:middle;margin-right:6px;">
+                <?php endif; ?>
+                <?php echo htmlspecialchars($settings['restaurant_name']); ?><span>.</span>
+            </a>
             <nav>
 
                 <ul class="nav-links">
@@ -211,13 +219,12 @@ if (isset($_SESSION['user_id'])) {
     <!-- Main Content -->
     <main>
         <!-- Hero Section -->
-        <section class="hero">
+        <?php $cover_url = get_cover_url($settings); ?>
+        <section class="hero"<?php if ($cover_url): ?> style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.65)), url('<?php echo $cover_url; ?>'); background-size: cover; background-position: center;"<?php endif; ?>>
             <div class="container hero-content">
-                <h3 class="hero-subtitle">WELLCOME</h3>
+                <h3 class="hero-subtitle">WELCOME</h3>
                 <h1 class="hero-title">Experience the finest <span>Grilled Beef</span> in town</h1>
-                <p class="hero-description">Welcome to Feliciano, where culinary excellence meets a warm, inviting
-                    atmosphere. Our signature Grilled Beef with potatoes is crafted with the finest ingredients and
-                    cooked to perfection.</p>
+                <p class="hero-description"><?php echo htmlspecialchars($settings['restaurant_about'] ?: 'Welcome to ' . $settings['restaurant_name'] . ', where culinary excellence meets a warm, inviting atmosphere.'); ?></p>
                 <div class="cta-buttons">
                     <a href="pages/menu.php" class="btn btn-primary">View Our Menu</a>
                     <a href="pages/contact.php" class="btn btn-secondary">Book a Table</a>
@@ -431,21 +438,167 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </section>
-    </main>
+        <!-- Featured / Is_featured Items Section -->
+        <?php
+        $featured_items = $conn->query("SELECT * FROM menu_items WHERE is_featured=1 AND status='active' ORDER BY name ASC LIMIT 8");
+        if ($featured_items && $featured_items->num_rows > 0):
+        ?>
+        <section class="signature-dish page-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our <span>Featured Dishes</span></h2>
+                    <p>Hand-picked favourites by our chef — must-try items loved by our guests</p>
+                </div>
+                <div class="dish-container">
+                    <?php while ($item = $featured_items->fetch_assoc()):
+                        $img_path = $item['image_url'] ?: 'assets/images/menu/default.jpg';
+                        $out_of_stock = isset($item['in_stock']) && !$item['in_stock'];
+                    ?>
+                    <div class="professional-menu-card<?= $out_of_stock ? ' out-of-stock-card' : '' ?>">
+                        <div class="card-image-container">
+                            <img src="<?= htmlspecialchars($img_path) ?>"
+                                 alt="<?= htmlspecialchars($item['name']) ?>"
+                                 class="dish-image"
+                                 onerror="this.src='assets/images/menu/default.jpg'">
+                            <div class="image-overlay"></div>
+                            <div class="signature-badge" style="background:#c9a74d;color:#1a1a2e">
+                                <i class="fas fa-star me-1"></i>Featured
+                            </div>
+                            <?php if ($out_of_stock): ?>
+                            <div style="position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit">
+                                <span style="background:#e74c3c;color:#fff;padding:6px 16px;border-radius:20px;font-weight:700;font-size:.85rem">Out of Stock</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="card-content">
+                            <h2 class="dish-name"><?= htmlspecialchars($item['name']) ?></h2>
+                            <?php if (!empty($item['description'])): ?>
+                            <p class="dish-description"><?= htmlspecialchars(mb_substr($item['description'],0,80)) . (mb_strlen($item['description'])>80?'…':'') ?></p>
+                            <?php endif; ?>
+                            <div class="price-order-container">
+                                <div class="price">
+                                    <?php if (!empty($item['discount_price']) && $item['discount_price'] > 0): ?>
+                                    <small style="text-decoration:line-through;color:#94a3b8;font-size:.75em">TK <?= number_format($item['price']) ?></small>
+                                    <span><small>TK</small> <?= number_format($item['discount_price']) ?></span>
+                                    <?php else: ?>
+                                    <small>TK</small> <?= number_format($item['price']) ?>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if (!$out_of_stock): ?>
+                                <button class="order-btn" onclick="addToOrder(<?= $item['id'] ?>, '<?= addslashes($item['name']) ?>', <?= $item['discount_price'] ?: $item['price'] ?>)">
+                                    <span>Order Now</span><i class="fas fa-arrow-right"></i>
+                                </button>
+                                <?php else: ?>
+                                <button class="order-btn" disabled style="opacity:.5;cursor:not-allowed">
+                                    <span>Out of Stock</span>
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
 
-    <!-- Footer -->
+        <!-- Testimonials Section -->
+        <?php
+        $testimonials = $conn->query("SHOW TABLES LIKE 'testimonials'");
+        $show_testimonials = $testimonials && $testimonials->num_rows > 0;
+        $testimonials_data = [];
+        if ($show_testimonials) {
+            $t_res = $conn->query("SELECT * FROM testimonials WHERE status='active' ORDER BY sort_order ASC, id DESC LIMIT 6");
+            if ($t_res) while ($row = $t_res->fetch_assoc()) $testimonials_data[] = $row;
+        }
+        if (!empty($testimonials_data)):
+        ?>
+        <section class="page-section" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:70px 0">
+            <div class="container">
+                <div class="section-title">
+                    <h2 style="color:#fff">What Our <span>Guests Say</span></h2>
+                    <p style="color:#94a3b8">Real reviews from people who love our food</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:40px">
+                    <?php foreach ($testimonials_data as $t):
+                        $stars = str_repeat('★', (int)$t['rating']) . str_repeat('☆', 5 - (int)$t['rating']);
+                    ?>
+                    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(201,167,77,.25);border-radius:14px;padding:24px;position:relative">
+                        <div style="color:#c9a74d;font-size:1.1rem;margin-bottom:8px"><?= $stars ?></div>
+                        <p style="color:#cbd5e1;font-size:.92rem;line-height:1.7;margin-bottom:16px;font-style:italic">"<?= htmlspecialchars($t['content']) ?>"</p>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c9a74d,#f0d080);display:flex;align-items:center;justify-content:center;font-weight:800;color:#1a1a2e;flex-shrink:0">
+                                <?= htmlspecialchars(mb_strtoupper(mb_substr($t['name'],0,1))) ?>
+                            </div>
+                            <div>
+                                <div style="color:#f1f5f9;font-weight:700;font-size:.88rem"><?= htmlspecialchars($t['name']) ?></div>
+                                <?php if (!empty($t['designation'])): ?>
+                                <div style="color:#64748b;font-size:.75rem"><?= htmlspecialchars($t['designation']) ?></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div style="position:absolute;top:16px;right:18px;font-size:2.5rem;color:rgba(201,167,77,.15);line-height:1">"</div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- FAQ Section -->
+        <?php
+        $faqs_check = $conn->query("SHOW TABLES LIKE 'faqs'");
+        $faqs_data = [];
+        if ($faqs_check && $faqs_check->num_rows > 0) {
+            $faq_res = $conn->query("SELECT * FROM faqs WHERE status='active' ORDER BY sort_order ASC, id ASC LIMIT 8");
+            if ($faq_res) while ($row = $faq_res->fetch_assoc()) $faqs_data[] = $row;
+        }
+        if (!empty($faqs_data)):
+        ?>
+        <section class="page-section" style="background:#f8fafc;padding:70px 0">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Frequently Asked <span>Questions</span></h2>
+                    <p>Everything you need to know about dining with us</p>
+                </div>
+                <div style="max-width:760px;margin:40px auto 0;display:flex;flex-direction:column;gap:12px">
+                    <?php foreach ($faqs_data as $idx => $faq): ?>
+                    <details style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden" <?= $idx===0?'open':'' ?>>
+                        <summary style="padding:16px 20px;font-weight:700;font-size:.95rem;color:#0f172a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                            <span><?= htmlspecialchars($faq['question']) ?></span>
+                            <i class="fas fa-chevron-down" style="color:#c9a74d;flex-shrink:0;transition:transform .25s"></i>
+                        </summary>
+                        <div style="padding:0 20px 16px;color:#475569;font-size:.88rem;line-height:1.7;border-top:1px solid #f1f5f9">
+                            <?= htmlspecialchars($faq['answer']) ?>
+                        </div>
+                    </details>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>Feliciano</h3>
-                    <p>Experience culinary excellence at Feliciano, where every dish tells a story of passion, quality,
-                        and tradition.</p>
+                    <h3><?php echo htmlspecialchars($settings['restaurant_name']); ?></h3>
+                    <p><?php echo htmlspecialchars($settings['restaurant_about'] ?: 'Experience culinary excellence at Feliciano, where every dish tells a story of passion, quality, and tradition.'); ?></p>
                     <div class="social-icons">
-                        <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-
+                        <?php if (!empty($settings['social_facebook'])): ?>
+                            <a href="<?php echo htmlspecialchars($settings['social_facebook']); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['social_instagram'])): ?>
+                            <a href="<?php echo htmlspecialchars($settings['social_instagram']); ?>" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['social_twitter'])): ?>
+                            <a href="<?php echo htmlspecialchars($settings['social_twitter']); ?>" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['social_youtube'])): ?>
+                            <a href="<?php echo htmlspecialchars($settings['social_youtube']); ?>" target="_blank"><i class="fab fa-youtube"></i></a>
+                        <?php endif; ?>
+                        <?php if (!empty($settings['social_tiktok'])): ?>
+                            <a href="<?php echo htmlspecialchars($settings['social_tiktok']); ?>" target="_blank"><i class="fab fa-tiktok"></i></a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -462,24 +615,35 @@ if (isset($_SESSION['user_id'])) {
                 <div class="footer-column">
                     <h3>Opening Hours</h3>
                     <ul>
-                        <li>Monday - Thursday: 11:00 AM - 10:00 PM</li>
-                        <li>Friday - Saturday: 11:00 AM - 11:00 PM</li>
-                        <li>Sunday: 12:00 PM - 9:00 PM</li>
+                        <?php
+                        $days_map = [
+                            'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday',
+                            'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'
+                        ];
+                        foreach ($days_map as $key => $label):
+                            $is_closed = !empty($settings['closed_' . $key]) && $settings['closed_' . $key] === '1';
+                            $open_fmt  = $is_closed ? 'Closed' : date('g:i A', strtotime($settings['open_' . $key] ?? '11:00')) . ' - ' . date('g:i A', strtotime($settings['close_' . $key] ?? '22:00'));
+                        ?>
+                        <li><?php echo $label; ?>: <?php echo $open_fmt; ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
 
                 <div class="footer-column">
                     <h3>Contact Info</h3>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Gourmet Street, Food City</li>
-                        <li><i class="fas fa-phone"></i> +8801772-353298</li>
-                        <li><i class="fas fa-envelope"></i> info@feliciano.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($settings['restaurant_address']); ?></li>
+                        <li><i class="fas fa-phone"></i> <?php echo htmlspecialchars($settings['restaurant_phone']); ?></li>
+                        <li><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($settings['restaurant_email']); ?></li>
+                        <?php if (!empty($settings['social_whatsapp'])): ?>
+                        <li><i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($settings['social_whatsapp']); ?></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
 
             <div class="copyright">
-                <p>&copy; 2023 Feliciano Restaurant. All rights reserved. | Designed with passion for fine dining</p>
+                <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($settings['restaurant_name']); ?>. All rights reserved. | Designed with passion for fine dining</p>
             </div>
         </div>
     </footer>

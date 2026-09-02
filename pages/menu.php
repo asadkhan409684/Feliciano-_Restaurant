@@ -2,6 +2,8 @@
 session_start(); 
 require_once '../config/database.php';
 require_once '../config/categories.php';
+require_once '../config/settings_helper.php';
+$settings = get_restaurant_settings($conn);
 
 // Fetch logged-in user's phone number from DB (name & email already in session)
 $loggedUserName  = '';
@@ -18,16 +20,40 @@ if (isset($_SESSION['user_id'])) {
     $loggedUserPhone = $phone_row['phone'] ?? '';
 }
 
-// Fetch only active categories that have items (or just use all from config if requested)
-// The user said "the categories in $category_labels are not showing on the website"
-// So I will use the keys from $category_labels as the base.
-$available_categories = array_keys($category_labels);
+// Load categories from DB (dynamic) — fallback to static config if table missing
+$dynamic_categories = [];
+$cat_result = $conn->query("SELECT name, slug, icon FROM menu_categories WHERE status='active' ORDER BY sort_order ASC, name ASC");
+if ($cat_result && $cat_result->num_rows > 0) {
+    while ($cat_row = $cat_result->fetch_assoc()) {
+        $dynamic_categories[$cat_row['slug']] = [
+            'name' => $cat_row['name'],
+            'icon' => $cat_row['icon'] ?? 'fa-tag',
+        ];
+    }
+} else {
+    // Fallback: use static config
+    foreach ($category_labels as $slug => $name) {
+        $dynamic_categories[$slug] = ['name' => $name, 'icon' => 'fa-tag'];
+    }
+}
+
+// Only show categories that actually have active menu items
+$available_categories = [];
+foreach (array_keys($dynamic_categories) as $slug) {
+    $check = $conn->prepare("SELECT COUNT(*) as c FROM menu_items WHERE LOWER(TRIM(category))=LOWER(?) AND status='active'");
+    $check->bind_param("s", $slug);
+    $check->execute();
+    $cnt = (int)$check->get_result()->fetch_assoc()['c'];
+    if ($cnt > 0) $available_categories[] = $slug;
+}
 
 // Fetch all active menu items
 $menu_query = "SELECT * FROM menu_items WHERE status = 'active' ORDER BY category, name";
 $menu_result = $conn->query($menu_query);
 $menu_items = [];
 while($row = $menu_result->fetch_assoc()) {
+    // Ensure in_stock column exists (backward compat)
+    if (!array_key_exists('in_stock', $row)) $row['in_stock'] = 1;
     $menu_items[] = $row;
 }
 ?>
@@ -37,11 +63,11 @@ while($row = $menu_result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu - Feliciano Restaurant</title>
+    <title>Menu - <?php echo htmlspecialchars($settings['restaurant_name']); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../assets/css/menu.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <link rel="icon" type="image/png" href="<?php echo get_logo_url($settings, '../'); ?>">
 </head>
 
 <body>
@@ -54,7 +80,12 @@ while($row = $menu_result->fetch_assoc()) {
     <!-- Header -->
      <header>   
         <div class="container header-container">
-            <a href="../index.php" class="logo">Feliciano<span>.</span></a>
+            <a href="../index.php" class="logo">
+                <?php if (!empty($settings['restaurant_logo'])): ?>
+                    <img src="<?php echo get_logo_url($settings, '../'); ?>" alt="<?php echo htmlspecialchars($settings['restaurant_name']); ?>" style="height:40px;width:auto;vertical-align:middle;margin-right:6px;">
+                <?php endif; ?>
+                <?php echo htmlspecialchars($settings['restaurant_name']); ?><span>.</span>
+            </a>
             <nav>
 
                 <ul class="nav-links">
@@ -224,8 +255,10 @@ while($row = $menu_result->fetch_assoc()) {
                 <div class="menu-categories">
                     <button class="category-btn active" data-category="all">All</button>
                     <?php foreach ($available_categories as $cat): ?>
+                        <?php $catData = $dynamic_categories[$cat] ?? ['name' => ucfirst($cat), 'icon' => 'fa-tag']; ?>
                         <button class="category-btn" data-category="<?php echo htmlspecialchars($cat); ?>">
-                            <?php echo htmlspecialchars($category_labels[$cat] ?? ucfirst($cat)); ?>
+                            <i class="fas <?php echo htmlspecialchars($catData['icon']); ?> me-1"></i>
+                            <?php echo htmlspecialchars($catData['name']); ?>
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -237,13 +270,21 @@ while($row = $menu_result->fetch_assoc()) {
                                 <div class="card-image-container">
                                     <?php 
                                         $img_path = str_starts_with($item['image_url'], 'http') ? $item['image_url'] : '../' . $item['image_url'];
+                                        $is_out_of_stock = isset($item['in_stock']) && $item['in_stock'] == 0;
                                     ?>
                                     <img src="<?php echo htmlspecialchars($img_path); ?>" 
                                          alt="<?php echo htmlspecialchars($item['name']); ?>" 
-                                         class="dish-image"
+                                         class="dish-image<?php echo $is_out_of_stock ? ' img-grayscale' : ''; ?>"
                                          onerror="this.src='https://via.placeholder.com/800x600/2a2a2a/c9a74d?text=Dish+Image'; this.classList.add('demo-image');">
                                     <div class="image-overlay"></div>
-                                    <div class="signature-badge"><?php echo htmlspecialchars($category_labels[$item['category']] ?? $item['category']); ?></div>
+                                    <?php if ($is_out_of_stock): ?>
+                                        <div class="out-of-stock-overlay">
+                                            <span class="out-of-stock-badge">
+                                                <i class="fas fa-ban me-1"></i>Out of Stock
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="signature-badge"><?php echo htmlspecialchars($dynamic_categories[$item['category']]['name'] ?? ($category_labels[$item['category']] ?? $item['category'])); ?></div>
                                 </div>
                                 <div class="card-content">
                                     <div class="rating">
@@ -265,10 +306,17 @@ while($row = $menu_result->fetch_assoc()) {
                                         <div class="price">
                                             <small>TK</small> <?php echo number_format($item['price']); ?>
                                         </div>
-                                        <button class="order-btn" onclick="addToOrder(<?php echo $item['id']; ?>, '<?php echo addslashes($item['name']); ?>', <?php echo $item['price']; ?>)">
-                                            <span>Order Now</span>
-                                            <i class="fas fa-arrow-right"></i>
-                                        </button>
+                                        <?php if ($is_out_of_stock): ?>
+                                            <button class="order-btn order-btn-disabled" disabled>
+                                                <span>Out of Stock</span>
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="order-btn" onclick="addToOrder(<?php echo $item['id']; ?>, '<?php echo addslashes($item['name']); ?>', <?php echo $item['price']; ?>)">
+                                                <span>Order Now</span>
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -290,14 +338,12 @@ while($row = $menu_result->fetch_assoc()) {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>Feliciano</h3>
-                    <p>Experience culinary excellence at Feliciano, where every dish tells a story of passion, quality,
-                        and tradition.</p>
+                    <h3><?php echo htmlspecialchars($settings['restaurant_name']); ?></h3>
+                    <p><?php echo htmlspecialchars($settings['restaurant_about'] ?: 'Experience culinary excellence at ' . $settings['restaurant_name'] . ', where every dish tells a story of passion, quality, and tradition.'); ?></p>
                     <div class="social-icons">
-                        <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-
+                        <?php if (!empty($settings['social_facebook'])): ?><a href="<?php echo htmlspecialchars($settings['social_facebook']); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_instagram'])): ?><a href="<?php echo htmlspecialchars($settings['social_instagram']); ?>" target="_blank"><i class="fab fa-instagram"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_twitter'])): ?><a href="<?php echo htmlspecialchars($settings['social_twitter']); ?>" target="_blank"><i class="fab fa-twitter"></i></a><?php endif; ?>
                     </div>
                 </div>
 
@@ -314,11 +360,29 @@ while($row = $menu_result->fetch_assoc()) {
                 <div class="footer-column">
                     <h3>Opening Hours</h3>
                     <ul>
-                        <li>Monday - Thursday: 11:00 AM - 10:00 PM</li>
-                        <li>Friday - Saturday: 11:00 AM - 11:00 PM</li>
-                        <li>Sunday: 10:00 AM - 9:00 PM</li>
+                        <?php
+                        $days_map = ['monday'=>'Mon','tuesday'=>'Tue','wednesday'=>'Wed','thursday'=>'Thu','friday'=>'Fri','saturday'=>'Sat','sunday'=>'Sun'];
+                        foreach ($days_map as $key => $label):
+                            $is_closed = !empty($settings['closed_'.$key]) && $settings['closed_'.$key]==='1';
+                            $hrs = $is_closed ? 'Closed' : date('g:i A', strtotime($settings['open_'.$key]??'11:00')).' - '.date('g:i A', strtotime($settings['close_'.$key]??'22:00'));
+                        ?>
+                        <li><?php echo $label; ?>: <?php echo $hrs; ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
+
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($settings['restaurant_address']); ?></li>
+                        <li><i class="fas fa-phone"></i> <?php echo htmlspecialchars($settings['restaurant_phone']); ?></li>
+                        <li><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($settings['restaurant_email']); ?></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($settings['restaurant_name']); ?>. All rights reserved.</p>
             </div>
         </div>
     </footer>

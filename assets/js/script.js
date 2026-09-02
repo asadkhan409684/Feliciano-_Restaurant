@@ -324,19 +324,19 @@ function initializeOnlineOrderModal() {
                 orders: orders
             };
 
-            // Robust path resolution for submit_order.php
+            // Robust path resolution for api/submit_order.php
             const getFetchUrl = () => {
                 const path = window.location.pathname;
                 const encodedProject = '/Feliciano%20%20Restaurant/';
                 const rawProject = '/Feliciano  Restaurant/';
                 
                 if (path.includes(encodedProject)) {
-                    return path.substring(0, path.indexOf(encodedProject) + encodedProject.length) + 'submit_order.php';
+                    return path.substring(0, path.indexOf(encodedProject) + encodedProject.length) + 'api/submit_order.php';
                 }
                 if (path.includes(rawProject)) {
-                    return path.substring(0, path.indexOf(rawProject) + rawProject.length) + 'submit_order.php';
+                    return path.substring(0, path.indexOf(rawProject) + rawProject.length) + 'api/submit_order.php';
                 }
-                return path.includes('/pages/') ? '../submit_order.php' : 'submit_order.php';
+                return path.includes('/pages/') ? '../api/submit_order.php' : 'api/submit_order.php';
             };
             
             const fetchUrl = getFetchUrl();
@@ -430,19 +430,19 @@ function initializeOfflineOrderModal() {
                 orders: orders
             };
 
-            // Robust path resolution for submit_order.php
+            // Robust path resolution for api/submit_order.php
             const getFetchUrl = () => {
                 const path = window.location.pathname;
                 const encodedProject = '/Feliciano%20%20Restaurant/';
                 const rawProject = '/Feliciano  Restaurant/';
                 
                 if (path.includes(encodedProject)) {
-                    return path.substring(0, path.indexOf(encodedProject) + encodedProject.length) + 'submit_order.php';
+                    return path.substring(0, path.indexOf(encodedProject) + encodedProject.length) + 'api/submit_order.php';
                 }
                 if (path.includes(rawProject)) {
-                    return path.substring(0, path.indexOf(rawProject) + rawProject.length) + 'submit_order.php';
+                    return path.substring(0, path.indexOf(rawProject) + rawProject.length) + 'api/submit_order.php';
                 }
-                return path.includes('/pages/') ? '../submit_order.php' : 'submit_order.php';
+                return path.includes('/pages/') ? '../api/submit_order.php' : 'api/submit_order.php';
             };
             
             const fetchUrl = getFetchUrl();

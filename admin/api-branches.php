@@ -27,6 +27,7 @@ switch ($action) {
         $name = $_POST['name'] ?? '';
         $location = $_POST['location'] ?? '';
         $phone = $_POST['phone'] ?? '';
+        $status = $_POST['status'] ?? 'active';
 
         if (empty($name) || empty($location) || empty($phone)) {
             echo json_encode(['success' => false, 'message' => 'All fields are required']);
@@ -35,12 +36,12 @@ switch ($action) {
 
         if ($id) {
             // Update
-            $stmt = $conn->prepare("UPDATE branches SET name = ?, location = ?, phone = ? WHERE id = ?");
-            $stmt->bind_param("sssi", $name, $location, $phone, $id);
+            $stmt = $conn->prepare("UPDATE branches SET name = ?, location = ?, phone = ?, status = ? WHERE id = ?");
+            $stmt->bind_param("ssssi", $name, $location, $phone, $status, $id);
         } else {
             // Insert
-            $stmt = $conn->prepare("INSERT INTO branches (name, location, phone) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $name, $location, $phone);
+            $stmt = $conn->prepare("INSERT INTO branches (name, location, phone, status) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("ssss", $name, $location, $phone, $status);
         }
 
         if ($stmt->execute()) {

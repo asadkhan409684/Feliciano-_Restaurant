@@ -31,7 +31,10 @@ if(isset($_POST['register'])){
     $name = $firstName . ' ' . $lastName;
     $email = filter_var(sanitize_input($_POST['email']), FILTER_VALIDATE_EMAIL);
     $phone = sanitize_input($_POST['phone']);
-    $userRole = sanitize_input($_POST['userRole']);
+
+    // Registration থেকে শুধু customer role allowed — অন্য role admin dashboard থেকে create হবে
+    $userRole = 'customer';
+    
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirmPassword'];
     $terms = isset($_POST['terms']) ? 1 : 0;
@@ -359,13 +362,8 @@ if(isset($_POST['register'])){
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    
-                                    <select class="form-select" id="userRole" name="userRole" required>
-                                        <option value="">Select account type</option>
-                                        <option value="customer" selected>Customer</option>
-                                    </select>
-                                </div>
+                                <!-- role hidden — registration সবসময় customer -->
+                                <input type="hidden" name="userRole" value="customer">
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">

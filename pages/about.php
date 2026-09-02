@@ -1,22 +1,31 @@
-<?php session_start(); ?>
+<?php session_start();
+require_once '../config/database.php';
+require_once '../config/settings_helper.php';
+$settings = get_restaurant_settings($conn);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Feliciano Restaurant</title>
+    <title>About Us - <?php echo htmlspecialchars($settings['restaurant_name']); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../assets/css/about.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <link rel="icon" type="image/png" href="<?php echo get_logo_url($settings, '../'); ?>">
 </head>
 
 <body>
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="../index.php" class="logo">Feliciano<span>.</span></a>
+            <a href="../index.php" class="logo">
+                <?php if (!empty($settings['restaurant_logo'])): ?>
+                    <img src="<?php echo get_logo_url($settings, '../'); ?>" alt="<?php echo htmlspecialchars($settings['restaurant_name']); ?>" style="height:40px;width:auto;vertical-align:middle;margin-right:6px;">
+                <?php endif; ?>
+                <?php echo htmlspecialchars($settings['restaurant_name']); ?><span>.</span>
+            </a>
             <nav>
                 <ul class="nav-links">
                     <li><a href="../index.php">Home</a></li>
@@ -80,7 +89,7 @@
         <section class="about-hero">
             <div class="container">
                 <div class="section-title">
-                    <h2>About <span>Feliciano</span></h2>
+                    <h2>About <span><?php echo htmlspecialchars($settings['restaurant_name']); ?></span></h2>
                     <p>Discover the story behind our culinary excellence and passion for fine dining</p>
                 </div>
             </div>
@@ -92,11 +101,13 @@
                 <div class="story-container">
                     <div class="story-content">
                         <h3>Our <span>Story</span></h3>
-                        <p>Founded in 2015, Feliciano Restaurant began as a dream to create an extraordinary dining experience that celebrates the art of culinary excellence. Named after our founder's grandfather, Feliciano embodies the tradition of bringing families together through exceptional food and warm hospitality.</p>
-                        
+                        <?php if (!empty($settings['restaurant_about'])): ?>
+                            <p><?php echo nl2br(htmlspecialchars($settings['restaurant_about'])); ?></p>
+                        <?php else: ?>
+                        <p>Founded in 2015, <?php echo htmlspecialchars($settings['restaurant_name']); ?> began as a dream to create an extraordinary dining experience that celebrates the art of culinary excellence. Named after our founder's grandfather, Feliciano embodies the tradition of bringing families together through exceptional food and warm hospitality.</p>
                         <p>What started as a small family restaurant has grown into one of the city's most beloved dining destinations, known for our signature grilled beef, innovative menu, and commitment to using only the finest ingredients sourced from local farms and trusted suppliers.</p>
-                        
-                        <p>Every dish at Feliciano tells a story of passion, creativity, and dedication to the craft of cooking. Our chefs combine traditional techniques with modern innovation to create memorable experiences that keep our guests coming back.</p>
+                        <p>Every dish at <?php echo htmlspecialchars($settings['restaurant_name']); ?> tells a story of passion, creativity, and dedication to the craft of cooking. Our chefs combine traditional techniques with modern innovation to create memorable experiences that keep our guests coming back.</p>
+                        <?php endif; ?>
                     </div>
                     <div class="story-image">
                         <div class="image-placeholder">
@@ -268,7 +279,7 @@
         <section class="page-section cta-section">
             <div class="container">
                 <div class="cta-content">
-                    <h3>Experience <span>Feliciano</span> Today</h3>
+                    <h3>Experience <span><?php echo htmlspecialchars($settings['restaurant_name']); ?></span> Today</h3>
                     <p>Join us for an unforgettable dining experience where every meal is a celebration of flavor, quality, and hospitality.</p>
                     <div class="cta-buttons">
                         <a href="menu.php" class="btn btn-primary">View Our Menu</a>
@@ -289,13 +300,13 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>Feliciano</h3>
-                    <p>Experience culinary excellence at Feliciano, where every dish tells a story of passion, quality,
-                        and tradition.</p>
+                    <h3><?php echo htmlspecialchars($settings['restaurant_name']); ?></h3>
+                    <p><?php echo htmlspecialchars($settings['restaurant_about'] ?: 'Experience culinary excellence at ' . $settings['restaurant_name'] . ', where every dish tells a story of passion, quality, and tradition.'); ?></p>
                     <div class="social-icons">
-                        <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <?php if (!empty($settings['social_facebook'])): ?><a href="<?php echo htmlspecialchars($settings['social_facebook']); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_instagram'])): ?><a href="<?php echo htmlspecialchars($settings['social_instagram']); ?>" target="_blank"><i class="fab fa-instagram"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_twitter'])): ?><a href="<?php echo htmlspecialchars($settings['social_twitter']); ?>" target="_blank"><i class="fab fa-twitter"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_youtube'])): ?><a href="<?php echo htmlspecialchars($settings['social_youtube']); ?>" target="_blank"><i class="fab fa-youtube"></i></a><?php endif; ?>
                     </div>
                 </div>
 
@@ -312,24 +323,29 @@
                 <div class="footer-column">
                     <h3>Opening Hours</h3>
                     <ul>
-                        <li>Monday - Thursday: 11:00 AM - 10:00 PM</li>
-                        <li>Friday - Saturday: 11:00 AM - 11:00 PM</li>
-                        <li>Sunday: 12:00 PM - 9:00 PM</li>
+                        <?php
+                        $days_map = ['monday'=>'Mon','tuesday'=>'Tue','wednesday'=>'Wed','thursday'=>'Thu','friday'=>'Fri','saturday'=>'Sat','sunday'=>'Sun'];
+                        foreach ($days_map as $key => $label):
+                            $is_closed = !empty($settings['closed_'.$key]) && $settings['closed_'.$key]==='1';
+                            $hrs = $is_closed ? 'Closed' : date('g:i A', strtotime($settings['open_'.$key]??'11:00')).' - '.date('g:i A', strtotime($settings['close_'.$key]??'22:00'));
+                        ?>
+                        <li><?php echo $label; ?>: <?php echo $hrs; ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
 
                 <div class="footer-column">
                     <h3>Contact Info</h3>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Gourmet Street, Food City</li>
-                        <li><i class="fas fa-phone"></i> +8801772-353298</li>
-                        <li><i class="fas fa-envelope"></i> info@feliciano.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($settings['restaurant_address']); ?></li>
+                        <li><i class="fas fa-phone"></i> <?php echo htmlspecialchars($settings['restaurant_phone']); ?></li>
+                        <li><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($settings['restaurant_email']); ?></li>
                     </ul>
                 </div>
             </div>
 
             <div class="copyright">
-                <p>&copy; 2023 Feliciano Restaurant. All rights reserved. | Designed with passion for fine dining</p>
+                <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($settings['restaurant_name']); ?>. All rights reserved. | Designed with passion for fine dining</p>
             </div>
         </div>
     </footer>

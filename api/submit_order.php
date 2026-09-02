@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/database.php';
+require '../config/database.php';
 
 // Prevent any PHP errors/notices from leaking into the JSON response
 error_reporting(E_ALL);

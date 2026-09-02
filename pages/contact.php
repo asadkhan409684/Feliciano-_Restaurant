@@ -1,6 +1,8 @@
 <?php
 session_start();
 require '../config/database.php';
+require_once '../config/settings_helper.php';
+$settings = get_restaurant_settings($conn);
 
 $success = '';
 $error   = '';
@@ -112,17 +114,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Feliciano Restaurant</title>
+    <title>Contact Us - <?php echo htmlspecialchars($settings['restaurant_name']); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../assets/css/contact.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <link rel="icon" type="image/png" href="<?php echo get_logo_url($settings, '../'); ?>">
 </head>
 <body>
     <!-- Header -->
       <header>
         <div class="container header-container">
-            <a href="../index.php" class="logo">Feliciano<span>.</span></a>
+            <a href="../index.php" class="logo">
+                <?php if (!empty($settings['restaurant_logo'])): ?>
+                    <img src="<?php echo get_logo_url($settings, '../'); ?>" alt="<?php echo htmlspecialchars($settings['restaurant_name']); ?>" style="height:40px;width:auto;vertical-align:middle;margin-right:6px;">
+                <?php endif; ?>
+                <?php echo htmlspecialchars($settings['restaurant_name']); ?><span>.</span>
+            </a>
             <nav>
 
                 <ul class="nav-links">
@@ -300,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-map-marker-alt"></i>
                             <div>
                                 <h4>Address</h4>
-                                <p>123 Gourmet Street, Food City, FC 10001</p>
+                                <p><?php echo htmlspecialchars($settings['restaurant_address']); ?></p>
                             </div>
                         </div>
                         
@@ -308,8 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-phone"></i>
                             <div>
                                 <h4>Phone Number</h4>
-                                <p>+8801772-353298</p>
-                                <p style="color: #aaa; font-size: 0.9rem; margin-top: 5px;">For reservations, call: +8801772-353299</p>
+                                <p><?php echo htmlspecialchars($settings['restaurant_phone']); ?></p>
                             </div>
                         </div>
                         
@@ -317,8 +323,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-envelope"></i>
                             <div>
                                 <h4>Email Address</h4>
-                                <p>info@feliciano.com</p>
-                                <p style="color: #aaa; font-size: 0.9rem; margin-top: 5px;">reservations@feliciano.com</p>
+                                <p><?php echo htmlspecialchars($settings['restaurant_email']); ?></p>
                             </div>
                         </div>
                         
@@ -326,9 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-clock"></i>
                             <div>
                                 <h4>Opening Hours</h4>
-                                <p><strong>Monday - Thursday:</strong> 11:00 AM - 10:00 PM</p>
-                                <p><strong>Friday - Saturday:</strong> 11:00 AM - 11:00 PM</p>
-                                <p><strong>Sunday:</strong> 12:00 PM - 9:00 PM</p>
+                                <?php echo get_hours_html($settings); ?>
                             </div>
                         </div>
                         
@@ -341,11 +344,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <div class="social-icons" style="margin-top: 30px;">
-                            <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-                            <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-                            
-                           
+                            <?php if (!empty($settings['social_facebook'])): ?>
+                                <a href="<?php echo htmlspecialchars($settings['social_facebook']); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                            <?php endif; ?>
+                            <?php if (!empty($settings['social_instagram'])): ?>
+                                <a href="<?php echo htmlspecialchars($settings['social_instagram']); ?>" target="_blank"><i class="fab fa-instagram"></i></a>
+                            <?php endif; ?>
+                            <?php if (!empty($settings['social_twitter'])): ?>
+                                <a href="<?php echo htmlspecialchars($settings['social_twitter']); ?>" target="_blank"><i class="fab fa-twitter"></i></a>
+                            <?php endif; ?>
+                            <?php if (!empty($settings['social_whatsapp'])): ?>
+                                <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $settings['social_whatsapp']); ?>" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                            <?php endif; ?>
+                            <?php if (!empty($settings['social_youtube'])): ?>
+                                <a href="<?php echo htmlspecialchars($settings['social_youtube']); ?>" target="_blank"><i class="fab fa-youtube"></i></a>
+                            <?php endif; ?>
                         </div>
                     </div>
                     
@@ -460,25 +473,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div class="map-container">
-                    <!-- Map placeholder - in production, embed Google Maps iframe here -->
+                    <?php if (!empty($settings['google_map_url']) && str_starts_with($settings['google_map_url'], 'http')): ?>
+                        <iframe
+                            src="<?php echo htmlspecialchars($settings['google_map_url']); ?>"
+                            width="100%" height="100%"
+                            style="border:0; min-height:350px;"
+                            allowfullscreen
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    <?php else: ?>
+                    <!-- Map placeholder — Google Map URL এখনো admin থেকে set করা হয়নি -->
                     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
                         <div style="text-align: center; padding: 20px; background-color: rgba(0,0,0,0.8); border-radius: 10px; max-width: 400px;">
                             <i class="fas fa-map-marked-alt" style="font-size: 3rem; color: #c9a74d; margin-bottom: 20px;"></i>
                             <h3 style="color: #c9a74d; margin-bottom: 10px;">Our Location</h3>
-                            <p><strong>Feliciano Restaurant</strong></p>
-                            <p>123 Gourmet Street<br>Food City, FC 10001</p>
+                            <p><strong><?php echo htmlspecialchars($settings['restaurant_name']); ?></strong></p>
+                            <p><?php echo nl2br(htmlspecialchars($settings['restaurant_address'])); ?></p>
                             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #444;">
                                 <p style="color: #aaa; font-size: 0.9rem;">
-                                    <i class="fas fa-subway"></i> Nearest subway: Gourmet Station (Line 1, 2)<br>
-                                    <i class="fas fa-parking"></i> Valet parking available<br>
-                                    <i class="fas fa-wheelchair"></i> Wheelchair accessible
+                                    <i class="fas fa-phone me-1"></i> <?php echo htmlspecialchars($settings['restaurant_phone']); ?><br>
+                                    <i class="fas fa-envelope me-1"></i> <?php echo htmlspecialchars($settings['restaurant_email']); ?>
                                 </p>
                             </div>
-                            <a href="#" class="btn btn-secondary" style="margin-top: 20px; display: inline-block;">
-                                <i class="fas fa-directions"></i> Get Directions
-                            </a>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
                 
                 <!-- Additional Contact Information -->
@@ -524,12 +544,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>Feliciano</h3>
-                    <p>Experience culinary excellence at Feliciano, where every dish tells a story of passion, quality, and tradition.</p>
+                    <h3><?php echo htmlspecialchars($settings['restaurant_name']); ?></h3>
+                    <p><?php echo htmlspecialchars($settings['restaurant_about'] ?: 'Experience culinary excellence at ' . $settings['restaurant_name'] . ', where every dish tells a story of passion, quality, and tradition.'); ?></p>
                     <div class="social-icons">
-                        <a href="https://www.facebook.com"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.twitter.com"><i class="fab fa-twitter"></i></a>
+                        <?php if (!empty($settings['social_facebook'])): ?><a href="<?php echo htmlspecialchars($settings['social_facebook']); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_instagram'])): ?><a href="<?php echo htmlspecialchars($settings['social_instagram']); ?>" target="_blank"><i class="fab fa-instagram"></i></a><?php endif; ?>
+                        <?php if (!empty($settings['social_twitter'])): ?><a href="<?php echo htmlspecialchars($settings['social_twitter']); ?>" target="_blank"><i class="fab fa-twitter"></i></a><?php endif; ?>
                     </div>
                 </div>
                 
@@ -546,28 +566,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="footer-column">
                     <h3>Opening Hours</h3>
                     <ul>
-                        <li>Monday - Thursday: 11:00 AM - 10:00 PM</li>
-                        <li>Friday - Saturday: 11:00 AM - 11:00 PM</li>
-                        <li>Sunday: 12:00 PM - 9:00 PM</li>
+                        <?php
+                        $days_map = ['monday'=>'Mon','tuesday'=>'Tue','wednesday'=>'Wed','thursday'=>'Thu','friday'=>'Fri','saturday'=>'Sat','sunday'=>'Sun'];
+                        foreach ($days_map as $key => $label):
+                            $is_closed = !empty($settings['closed_'.$key]) && $settings['closed_'.$key]==='1';
+                            $hrs = $is_closed ? 'Closed' : date('g:i A', strtotime($settings['open_'.$key]??'11:00')).' - '.date('g:i A', strtotime($settings['close_'.$key]??'22:00'));
+                        ?>
+                        <li><?php echo $label; ?>: <?php echo $hrs; ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
                 
                 <div class="footer-column">
                     <h3>Contact Info</h3>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Gourmet Street, Food City</li>
-                        <li><i class="fas fa-phone"></i> +8801772-353298</li>
-                        <li><i class="fas fa-envelope"></i> info@feliciano.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($settings['restaurant_address']); ?></li>
+                        <li><i class="fas fa-phone"></i> <?php echo htmlspecialchars($settings['restaurant_phone']); ?></li>
+                        <li><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($settings['restaurant_email']); ?></li>
                     </ul>
                 </div>
             </div>
             
             <div class="copyright">
-                <p>&copy; 2023 Feliciano Restaurant. All rights reserved. | Designed with passion for fine dining</p>
+                <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($settings['restaurant_name']); ?>. All rights reserved. | Designed with passion for fine dining</p>
                 <p style="margin-top: 10px; font-size: 0.8rem; color: #666;">
                     <a href="#" style="color: #666; text-decoration: none;">Privacy Policy</a> | 
-                    <a href="#" style="color: #666; text-decoration: none;">Terms of Service</a> | 
-                    <a href="#" style="color: #666; text-decoration: none;">Accessibility Statement</a>
+                    <a href="#" style="color: #666; text-decoration: none;">Terms of Service</a>
                 </p>
             </div>
         </div>
